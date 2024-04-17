@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/aaaaa" />
+            <option value="$PROJECT_DIR$/alertex" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/app/viewapp" />
+            <option value="$PROJECT_DIR$/ch10_notification" />
+            <option value="$PROJECT_DIR$/ch11_jetpack" />
+            <option value="$PROJECT_DIR$/ch6_view2" />
+            <option value="$PROJECT_DIR$/ch7_layout" />
+            <option value="$PROJECT_DIR$/ch8_event" />
+            <option value="$PROJECT_DIR$/ch9_resource" />
+            <option value="$PROJECT_DIR$/constraintlayout" />
+            <option value="$PROJECT_DIR$/drawlayoutex" />
+            <option value="$PROJECT_DIR$/fragmentex" />
+            <option value="$PROJECT_DIR$/framelayout" />
+            <option value="$PROJECT_DIR$/gridlayout" />
+            <option value="$PROJECT_DIR$/linearlayoutex" />
+            <option value="$PROJECT_DIR$/permissionex" />
+            <option value="$PROJECT_DIR$/recyclerviewex" />
+            <option value="$PROJECT_DIR$/relativelayout" />
+            <option value="$PROJECT_DIR$/userevent" />
+            <option value="$PROJECT_DIR$/viewoption" />
+            <option value="$PROJECT_DIR$/viewpager2ex" />
+          </set>
+        </option>
+        <option name="resolveExternalAnnotations" value="false" />
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

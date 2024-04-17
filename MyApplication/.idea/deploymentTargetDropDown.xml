@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="deploymentTargetDropDown">
+    <value>
+      <entry key="alertex">
+        <State />
+      </entry>
+      <entry key="app">
+        <State />
+      </entry>
+      <entry key="app.viewapp">
+        <State />
+      </entry>
+      <entry key="ch10_notification">
+        <State />
+      </entry>
+      <entry key="ch11_jetpack">
+        <State />
+      </entry>
+      <entry key="ch6_view2">
+        <State />
+      </entry>
+      <entry key="ch7_layout">
+        <State />
+      </entry>
+      <entry key="ch8_event">
+        <State />
+      </entry>
+      <entry key="ch9_resource">
+        <State />
+      </entry>
+      <entry key="constraintlayout">
+        <State />
+      </entry>
+      <entry key="drawlayoutex">
+        <State />
+      </entry>
+      <entry key="fragmentex">
+        <State />
+      </entry>
+      <entry key="framelayout">
+        <State />
+      </entry>
+      <entry key="gridlayout">
+        <State />
+      </entry>
+      <entry key="linearlayoutex">
+        <State />
+      </entry>
+      <entry key="permissionex">
+        <State />
+      </entry>
+      <entry key="recyclerviewex">
+        <State />
+      </entry>
+      <entry key="relativelayout">
+        <State />
+      </entry>
+      <entry key="userevent">
+        <State />
+      </entry>
+      <entry key="viewoption">
+        <State />
+      </entry>
+      <entry key="viewpager2ex">
+        <State />
+      </entry>
+    </value>
+  </component>
+</project>
