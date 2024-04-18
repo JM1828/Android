@@ -5,6 +5,8 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
@@ -19,11 +21,15 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.junmo.airquality.databinding.ActivityMainBinding
+import java.io.IOException
+import java.lang.IllegalArgumentException
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     // 데이터 바인딩을 사용하여 액티비티의 레이아웃과 상호작용하는 데 사용
     lateinit var binding: ActivityMainBinding
+    lateinit var locationProvider: LocationProvider
 
     // 위치 권한 요청에 사용되는 요청 코드를 정의
     private val PERMISSIONS_REQUEST_CODE = 100
@@ -46,6 +52,48 @@ class MainActivity : AppCompatActivity() {
 
         // 앱이 실행될 때, onCreate() 함수가 호출되면서 checkAllPermissions() 함수가 실행
         checkAllPermissions()
+        updateUI()
+    }
+
+    private fun updateUI() {
+        locationProvider = LocationProvider(this)
+
+        val latitude: Double? = locationProvider.getLocationLatitude()
+        val longitude: Double? = locationProvider.getLocationLongitude()
+
+        if (latitude != null && longitude != null) {
+            // 1. 현재 위치가져오고 UI 업데이트
+            val address = getCurrentAddress(latitude,longitude)
+
+            address?.let {
+                binding.tvLocationTitle.text = "${it.thoroughfare}"
+                binding.tvLocationSubtitle.text = "${it.countryName} ${it.adminArea}"
+            }
+            // 2. 미세먼지 농도 가져오고 UI 업데이트
+        } else {
+            Toast.makeText(this, "위도, 경도 정보를 가져올 수 없습니다.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun getCurrentAddress(latitude: Double, longitude: Double): Address? {
+        val geoCoder = Geocoder(this, Locale.getDefault())
+        val addresses: List<Address>?
+
+        addresses = try { //Geocoder 객체를 이용하여 위도와 경도로부터 리스트를 가져옵니다.
+            geoCoder.getFromLocation(latitude, longitude, 7)
+        } catch (ioException: IOException) {
+            Toast.makeText(this, "지오코더 서비스 사용불가합니다.", Toast.LENGTH_LONG).show()
+            return null
+        } catch (illegalArgumentException: IllegalArgumentException) {
+            Toast.makeText(this, "잘못된 위도, 경도 입니다.", Toast.LENGTH_LONG).show()
+            return null
+        }
+
+        if (addresses == null || addresses.size == 0) {
+            Toast.makeText(this, "주소가 발견되지 않았습니다.", Toast.LENGTH_LONG).show()
+            return null
+        }
+        return addresses[0]
     }
 
     // 앱에서 필요로 하는 모든 권한을 확인하는 역할
@@ -77,11 +125,11 @@ class MainActivity : AppCompatActivity() {
     private fun isRunTimePermissionsGranted() {
         // 현재 앱이 특정 위치 권한을 보유하고 있는지 확인하고, 그 결과를 각각 변수에 저장
         val hasFineLocationPermission = ContextCompat.checkSelfPermission(
-            this@MainActivity,
+            this,
             Manifest.permission.ACCESS_FINE_LOCATION
         )
         val hasCoarseLocationPermission = ContextCompat.checkSelfPermission(
-            this@MainActivity,
+            this,
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
 
@@ -89,7 +137,7 @@ class MainActivity : AppCompatActivity() {
         if (hasFineLocationPermission != PackageManager.PERMISSION_GRANTED || hasCoarseLocationPermission != PackageManager.PERMISSION_GRANTED) {
             // 권한이 없는 경우 "ActivityCompat.requestPermissions"를 사용하여 사용자에게 권한을 요청
             ActivityCompat.requestPermissions(
-                this@MainActivity,
+                this,
                 REQUIRED_PERMISSIONS,
                 PERMISSIONS_REQUEST_CODE
             )
@@ -118,10 +166,11 @@ class MainActivity : AppCompatActivity() {
             // 만약 모든 권한이 부여되었다면 "위치값을 가져올 수 있음"이라는 처리
             if (checkResult) {
                 // 위치값을 가져올 수 있음
+                updateUI()
             } else {
                 // 그렇지 않을 경우 "퍼미션이 거부되었습니다. 앱을 실행하여 퍼미션을 허용해주세요."라는 메시지를 사용자에게 보여주고 앱을 종료
                 Toast.makeText(
-                    this@MainActivity,
+                    this,
                     "퍼미션이 거부되었습니다. 앱을 실행하여 퍼미션을 허용해주세요.",
                     Toast.LENGTH_LONG
                 ).show()
@@ -145,7 +194,7 @@ class MainActivity : AppCompatActivity() {
                     isRunTimePermissionsGranted()
                 } else {
                     // 위치 서비스를 사용할 수 없는 경우에는 사용자에게 "위치 서비스를 사용할 수 없습니다."라는 메시지를 보여주고, 앱을 종료
-                    Toast.makeText(this@MainActivity, "위치 서비스를 사용할 수 없습니다.", Toast.LENGTH_LONG)
+                    Toast.makeText(this, "위치 서비스를 사용할 수 없습니다.", Toast.LENGTH_LONG)
                         .show()
                     finish()
                 }
@@ -153,7 +202,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // AlertDialog.Builder를 사용하여 다이얼로그를 생성
-        val builder: AlertDialog.Builder = AlertDialog.Builder(this@MainActivity)
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         // 제목은 "위치 서비스 비활성화"로 설정
         builder.setTitle("위치 서비스 비활성화")
         // 메시지는 "위치 서비스가 꺼져있습니다. 설정해야 앱을 사용할 수 있습니다."로 설정
@@ -169,7 +218,7 @@ class MainActivity : AppCompatActivity() {
         // "취소" 버튼을 누를 경우, 다이얼로그를 취소하고 사용자에게 "위치 서비스를 사용할 수 없습니다."라는 메시지를 보여주며, 앱을 종료
         builder.setNegativeButton("취소", DialogInterface.OnClickListener { dialogInterface, i ->
             dialogInterface.cancel()
-            Toast.makeText(this@MainActivity, "위치 서비스를 사용할 수 없습니다.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "위치 서비스를 사용할 수 없습니다.", Toast.LENGTH_LONG).show()
             finish()
         })
         // AlertDialog.Builder로부터 생성된 다이얼로그를 화면에 표시하는 역할
