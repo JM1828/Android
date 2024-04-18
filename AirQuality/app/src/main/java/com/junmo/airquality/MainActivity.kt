@@ -11,18 +11,23 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.junmo.airquality.databinding.ActivityMainBinding
+import com.junmo.airquality.retrofit.AirQualityResponse
+import com.junmo.airquality.retrofit.AirQualityService
+import com.junmo.airquality.retrofit.RetrofitConnection
+import retrofit2.Call
+import retrofit2.Response
 import java.io.IOException
 import java.lang.IllegalArgumentException
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -53,34 +58,114 @@ class MainActivity : AppCompatActivity() {
         // 앱이 실행될 때, onCreate() 함수가 호출되면서 checkAllPermissions() 함수가 실행
         checkAllPermissions()
         updateUI()
+        setRefreshButton()
     }
 
+    // 현재 위치 정보를 가져와 UI를 업데이트
     private fun updateUI() {
+        // LocationProvider를 초기화하여 현재 위치 정보를 가져옴
         locationProvider = LocationProvider(this)
 
+        // latitude와 longitude 변수를 통해 현재 위치의 위도와 경도를 가져옴
         val latitude: Double? = locationProvider.getLocationLatitude()
         val longitude: Double? = locationProvider.getLocationLongitude()
 
+        // 만약 latitude와 longitude가 모두 null이 아니라면, 현재 위치의 주소 정보를 가져와서 UI를 업데이트
         if (latitude != null && longitude != null) {
             // 1. 현재 위치가져오고 UI 업데이트
-            val address = getCurrentAddress(latitude,longitude)
+            val address = getCurrentAddress(latitude, longitude)
 
+            // address가 null이 아닐 때, 해당 주소 정보를 사용하여 UI를 업데이트
             address?.let {
                 binding.tvLocationTitle.text = "${it.thoroughfare}"
                 binding.tvLocationSubtitle.text = "${it.countryName} ${it.adminArea}"
             }
             // 2. 미세먼지 농도 가져오고 UI 업데이트
+            getAirQualityData(latitude, longitude)
+            // 만약 latitude와 longitude 중 하나라도 null이라면, "위도, 경도 정보를 가져올 수 없습니다."라는 메시지를 포함한 Toast를 표시
         } else {
             Toast.makeText(this, "위도, 경도 정보를 가져올 수 없습니다.", Toast.LENGTH_LONG).show()
         }
     }
 
+    private fun getAirQualityData(latitude: Double, longitude: Double) {
+        var retrofitAPI = RetrofitConnection.getInstance().create(
+            AirQualityService::class.java
+        )
+        retrofitAPI.getAirQualityData(
+            latitude.toString(),
+            longitude.toString(),
+            "2d32be22-a9fc-41b7-8d13-85c79fc1272b"
+        ).enqueue(object : retrofit2.Callback<AirQualityResponse> {
+            override fun onResponse(
+                call: Call<AirQualityResponse>,
+                response: Response<AirQualityResponse>
+            ) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@MainActivity, "최신 데이터 업데이트 완료!", Toast.LENGTH_LONG).show()
+                    response.body()?.let { updateAirUI(it) }
+                } else {
+                    Toast.makeText(this@MainActivity, "데이터를 가져오는 데 실패했습니다.", Toast.LENGTH_LONG)
+                        .show()
+                }
+            }
+
+            override fun onFailure(call: Call<AirQualityResponse>, t: Throwable) {
+                t.printStackTrace()
+                Toast.makeText(this@MainActivity, "데이터를 가져오는 데 실패했습니다.", Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
+    private fun updateAirUI(airQualityData: AirQualityResponse) {
+        val pollutionData = airQualityData.data.current.pollution
+
+        // 수치를 지정
+        binding.tvCount.text = pollutionData.aqius.toString()
+
+        // 측정된 날짜
+        val dateTime = ZonedDateTime.parse(pollutionData.ts).withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+
+        binding.tvCheckTime.text = dateTime.format(dateFormatter).toString()
+
+        when(pollutionData.aqius) {
+            in 0..50 -> {
+                binding.tvTitle.text = "좋음"
+                binding.imgBg.setImageResource(R.drawable.bg_good)
+            }
+            in 51..150 -> {
+                binding.tvTitle.text = "보통"
+                binding.imgBg.setImageResource(R.drawable.bg_soso)
+            }
+            in 151..200 -> {
+                binding.tvTitle.text = "나쁨"
+                binding.imgBg.setImageResource(R.drawable.bg_bad)
+            }
+            else -> {
+                binding.tvTitle.text = "매우 나쁨"
+                binding.imgBg.setImageResource(R.drawable.bg_worst)
+            }
+        }
+
+    }
+
+    private fun setRefreshButton() {
+        binding.btnRefresh.setOnClickListener {
+            updateUI()
+        }
+    }
+
+    // 현재 위치의 위도와 경도를 이용하여 해당 위치의 주소 정보를 가져오는 함수
     private fun getCurrentAddress(latitude: Double, longitude: Double): Address? {
+        // Geocoder를 사용하여 현재 위치의 위도와 경도를 이용하여 해당 위치의 주소 정보를 가져옴
         val geoCoder = Geocoder(this, Locale.getDefault())
         val addresses: List<Address>?
 
-        addresses = try { //Geocoder 객체를 이용하여 위도와 경도로부터 리스트를 가져옵니다.
+        addresses = try {
+            // getFromLocation 함수를 사용하여 위도와 경도로부터 주소 리스트를 가져오며, 최대 7개의 결과를 반환
             geoCoder.getFromLocation(latitude, longitude, 7)
+            // 예외 처리를 통해 지오코더 서비스 사용 불가, 잘못된 위도, 경도, 주소가 발견되지 않는 경우에 대한 처리
         } catch (ioException: IOException) {
             Toast.makeText(this, "지오코더 서비스 사용불가합니다.", Toast.LENGTH_LONG).show()
             return null
@@ -89,10 +174,12 @@ class MainActivity : AppCompatActivity() {
             return null
         }
 
+        // 주소 리스트가 null이거나 비어있는 경우에는 해당 위치의 주소가 발견되지 않았다는 메시지를 표시하고 null을 반환
         if (addresses == null || addresses.size == 0) {
             Toast.makeText(this, "주소가 발견되지 않았습니다.", Toast.LENGTH_LONG).show()
             return null
         }
+        // 현재 위치의 위도와 경도를 이용하여 해당 위치의 주소 정보를 가져온 후, 주소 리스트 중 첫 번째 주소를 반환
         return addresses[0]
     }
 
