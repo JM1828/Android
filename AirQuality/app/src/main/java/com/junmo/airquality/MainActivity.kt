@@ -11,6 +11,8 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -32,12 +34,14 @@ import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
-    // 데이터 바인딩을 사용하여 액티비티의 레이아웃과 상호작용하는 데 사용
     lateinit var binding: ActivityMainBinding
     lateinit var locationProvider: LocationProvider
 
     // 위치 권한 요청에 사용되는 요청 코드를 정의
     private val PERMISSIONS_REQUEST_CODE = 100
+
+    var latitude: Double? = 0.0
+    var longitude: Double? = 0.0
 
     // 필요한 위치 권한을 배열로 정의
     val REQUIRED_PERMISSIONS = arrayOf(
@@ -50,6 +54,19 @@ class MainActivity : AppCompatActivity() {
     // Intent를 입력으로 받아 액티비티 결과를 처리하는 데 사용
     lateinit var getGPSPermissionLauncher: ActivityResultLauncher<Intent>
 
+    val startMapActivityResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult(),
+            object : ActivityResultCallback<ActivityResult> {
+                override fun onActivityResult(result: ActivityResult) {
+                    if (result?.resultCode ?: 0 == Activity.RESULT_OK) {
+                        latitude = result?.data?.getDoubleExtra("latitude", 0.0) ?: 0.0
+                        longitude = result?.data?.getDoubleExtra("longitude", 0.0) ?: 0.0
+                        updateUI()
+                    }
+                }
+            }
+        )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -59,6 +76,8 @@ class MainActivity : AppCompatActivity() {
         checkAllPermissions()
         updateUI()
         setRefreshButton()
+
+        setFab()
     }
 
     // 현재 위치 정보를 가져와 UI를 업데이트
@@ -66,23 +85,26 @@ class MainActivity : AppCompatActivity() {
         // LocationProvider를 초기화하여 현재 위치 정보를 가져옴
         locationProvider = LocationProvider(this)
 
-        // latitude와 longitude 변수를 통해 현재 위치의 위도와 경도를 가져옴
-        val latitude: Double? = locationProvider.getLocationLatitude()
-        val longitude: Double? = locationProvider.getLocationLongitude()
+        if (latitude == 0.0 && longitude == 0.0) {
+            // latitude와 longitude 변수를 통해 현재 위치의 위도와 경도를 가져옴
+            latitude = locationProvider.getLocationLatitude()
+            longitude = locationProvider.getLocationLongitude()
+        }
 
         // 만약 latitude와 longitude가 모두 null이 아니라면, 현재 위치의 주소 정보를 가져와서 UI를 업데이트
         if (latitude != null && longitude != null) {
             // 1. 현재 위치가져오고 UI 업데이트
-            val address = getCurrentAddress(latitude, longitude)
+            val address = getCurrentAddress(latitude!!, longitude!!)
 
             // address가 null이 아닐 때, 해당 주소 정보를 사용하여 UI를 업데이트
             address?.let {
+                // thoroughfare : 동을 나타냄 (수영동, 광안동)
                 binding.tvLocationTitle.text = "${it.thoroughfare}"
+                // countryName : 나라 이름
                 binding.tvLocationSubtitle.text = "${it.countryName} ${it.adminArea}"
             }
             // 2. 미세먼지 농도 가져오고 UI 업데이트
-            getAirQualityData(latitude, longitude)
-            // 만약 latitude와 longitude 중 하나라도 null이라면, "위도, 경도 정보를 가져올 수 없습니다."라는 메시지를 포함한 Toast를 표시
+            getAirQualityData(latitude!!, longitude!!)
         } else {
             Toast.makeText(this, "위도, 경도 정보를 가져올 수 없습니다.", Toast.LENGTH_LONG).show()
         }
@@ -92,17 +114,20 @@ class MainActivity : AppCompatActivity() {
         var retrofitAPI = RetrofitConnection.getInstance().create(
             AirQualityService::class.java
         )
+        // Retrofit을 사용하여 API 요청을 보냄, 응답을 비동기적으로 처리하기 위해 enqueue 메서드를 사용하고, 응답을 처리하기 위한 Callback을 정의
         retrofitAPI.getAirQualityData(
             latitude.toString(),
             longitude.toString(),
             "2d32be22-a9fc-41b7-8d13-85c79fc1272b"
         ).enqueue(object : retrofit2.Callback<AirQualityResponse> {
+            // 응답이 성공적이면 사용자에게 메시지를 표시하고, 받은 데이터를 UI에 업데이트하는 updateAirUI 함수를 호출
             override fun onResponse(
                 call: Call<AirQualityResponse>,
                 response: Response<AirQualityResponse>
             ) {
                 if (response.isSuccessful) {
                     Toast.makeText(this@MainActivity, "최신 데이터 업데이트 완료!", Toast.LENGTH_LONG).show()
+                    // 응답에 body 값이 null 이 아니면 UI를 업데이트
                     response.body()?.let { updateAirUI(it) }
                 } else {
                     Toast.makeText(this@MainActivity, "데이터를 가져오는 데 실패했습니다.", Toast.LENGTH_LONG)
@@ -124,24 +149,29 @@ class MainActivity : AppCompatActivity() {
         binding.tvCount.text = pollutionData.aqius.toString()
 
         // 측정된 날짜
-        val dateTime = ZonedDateTime.parse(pollutionData.ts).withZoneSameInstant(ZoneId.of("Asia/Seoul")).toLocalDateTime()
+        val dateTime =
+            ZonedDateTime.parse(pollutionData.ts).withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime()
         val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
 
         binding.tvCheckTime.text = dateTime.format(dateFormatter).toString()
 
-        when(pollutionData.aqius) {
+        when (pollutionData.aqius) {
             in 0..50 -> {
                 binding.tvTitle.text = "좋음"
                 binding.imgBg.setImageResource(R.drawable.bg_good)
             }
+
             in 51..150 -> {
                 binding.tvTitle.text = "보통"
                 binding.imgBg.setImageResource(R.drawable.bg_soso)
             }
+
             in 151..200 -> {
                 binding.tvTitle.text = "나쁨"
                 binding.imgBg.setImageResource(R.drawable.bg_bad)
             }
+
             else -> {
                 binding.tvTitle.text = "매우 나쁨"
                 binding.imgBg.setImageResource(R.drawable.bg_worst)
@@ -150,22 +180,31 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    // 새로고침 버튼을 눌렀을때 updateUI 함수를 실행
     private fun setRefreshButton() {
         binding.btnRefresh.setOnClickListener {
             updateUI()
         }
     }
 
+    private fun setFab() {
+        binding.fab.setOnClickListener {
+            val intent = Intent(this, MapActivity::class.java)
+            intent.putExtra("currentLat", latitude)
+            intent.putExtra("currentLng", longitude)
+            startMapActivityResult.launch(intent)
+        }
+    }
+
     // 현재 위치의 위도와 경도를 이용하여 해당 위치의 주소 정보를 가져오는 함수
     private fun getCurrentAddress(latitude: Double, longitude: Double): Address? {
         // Geocoder를 사용하여 현재 위치의 위도와 경도를 이용하여 해당 위치의 주소 정보를 가져옴
-        val geoCoder = Geocoder(this, Locale.getDefault())
+        val geoCoder = Geocoder(this, Locale.KOREA)
         val addresses: List<Address>?
 
         addresses = try {
             // getFromLocation 함수를 사용하여 위도와 경도로부터 주소 리스트를 가져오며, 최대 7개의 결과를 반환
             geoCoder.getFromLocation(latitude, longitude, 7)
-            // 예외 처리를 통해 지오코더 서비스 사용 불가, 잘못된 위도, 경도, 주소가 발견되지 않는 경우에 대한 처리
         } catch (ioException: IOException) {
             Toast.makeText(this, "지오코더 서비스 사용불가합니다.", Toast.LENGTH_LONG).show()
             return null
@@ -197,7 +236,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     // GPS 또는 네트워크 위치 제공자 중 하나라도 활성화되어 있으면 true를 반환하고, 그렇지 않으면 false를 반환
-    // 따라서 앱에서 위치 서비스의 사용 가능 여부를 확인하는 데 사용될 수 있음
     private fun isLocationServicesAvailable(): Boolean {
         // 시스템 서비스에서 위치 관리자(LocationManager)를 가져오는 부분으로, 이를 통해 위치 관련 기능을 사용할 수 있음
         val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
@@ -258,7 +296,7 @@ class MainActivity : AppCompatActivity() {
                 // 그렇지 않을 경우 "퍼미션이 거부되었습니다. 앱을 실행하여 퍼미션을 허용해주세요."라는 메시지를 사용자에게 보여주고 앱을 종료
                 Toast.makeText(
                     this,
-                    "퍼미션이 거부되었습니다. 앱을 실행하여 퍼미션을 허용해주세요.",
+                    "퍼미션이 거부되었습니다. 앱을 다시 실행하여 퍼미션을 허용해주세요.",
                     Toast.LENGTH_LONG
                 ).show()
                 finish()
@@ -274,25 +312,20 @@ class MainActivity : AppCompatActivity() {
             ActivityResultContracts.StartActivityForResult()
             // GPS 권한 요청이 완료된 후 호출되는 콜백에서는 결과코드가 Activity.RESULT_OK인지 확인
         ) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
                 //  isLocationServicesAvailable() 함수를 사용하여 위치 서비스가 사용 가능한지 확인
                 if (isLocationServicesAvailable()) {
                     // isRunTimePermissionsGranted() 함수를 호출하여 권한을 확인
                     isRunTimePermissionsGranted()
                 } else {
-                    // 위치 서비스를 사용할 수 없는 경우에는 사용자에게 "위치 서비스를 사용할 수 없습니다."라는 메시지를 보여주고, 앱을 종료
                     Toast.makeText(this, "위치 서비스를 사용할 수 없습니다.", Toast.LENGTH_LONG)
                         .show()
                     finish()
                 }
             }
-        }
 
         // AlertDialog.Builder를 사용하여 다이얼로그를 생성
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        // 제목은 "위치 서비스 비활성화"로 설정
         builder.setTitle("위치 서비스 비활성화")
-        // 메시지는 "위치 서비스가 꺼져있습니다. 설정해야 앱을 사용할 수 있습니다."로 설정
         builder.setMessage("위치 서비스가 꺼져있습니다. 설정해야 앱을 사용할 수 있습니다.")
         // 다이얼로그가 취소 가능하도록 설정되고, "설정" 및 "취소" 두 개의 버튼이 추가됨
         builder.setCancelable(true)

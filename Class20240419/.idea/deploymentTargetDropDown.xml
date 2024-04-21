@@ -5,7 +5,16 @@
       <entry key="app">
         <State />
       </entry>
+      <entry key="ch13_activity">
+        <State />
+      </entry>
+      <entry key="ch14_receiver">
+        <State />
+      </entry>
       <entry key="coroutineex">
+        <State />
+      </entry>
+      <entry key="receiverex">
         <State />
       </entry>
     </value>
