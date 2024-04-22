@@ -21,12 +21,7 @@
         <receiver
             android:name=".MyReceiver"
             android:exported="true"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="android.intent.action.SCREEN_ON" />
-                <action android:name="android.intent.action.SCREEN_OFF" />
-            </intent-filter>
-        </receiver>
+            android:enabled="true"/>
     </application>
 
 </manifest>
