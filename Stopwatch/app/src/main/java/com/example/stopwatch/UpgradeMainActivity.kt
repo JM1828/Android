@@ -25,19 +25,12 @@ class UpgradeMainActivity : AppCompatActivity(), View.OnClickListener {
 
     // 타이머를 나타내는 Timer 객체를 가리키는 변수를 선언
     private var timer: Timer? = null
-
     // 타이머의 현재 시간을 나타내는 변수를 선언
     private var time = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main_upgrade)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
 
         btn_start = findViewById(R.id.btn_start)
         btn_refresh = findViewById(R.id.btn_refresh)

@@ -19,9 +19,11 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // registerForActivityResult를 사용하여 ActivityResultContracts.RequestMultiplePermissions를 등록하고, 권한 요청의 결과를 처리
         val permissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) {
+            // 모든 권한이 허용되었을 경우에는 MyReceiver 클래스로부터 전달받은 intent를 브로드캐스트하여 처리
             if (it.all { permission -> permission.value == true }) {
                 val intent = Intent(this, MyReceiver::class.java)
                 sendBroadcast(intent)
@@ -30,6 +32,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // 배터리 상태 및 충전 여부를 확인하고 해당 정보에 따라 화면에 표시하는 부분
         registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))!!.apply {
             when(getIntExtra(BatteryManager.EXTRA_STATUS, -1)){
                 BatteryManager.BATTERY_STATUS_CHARGING -> {

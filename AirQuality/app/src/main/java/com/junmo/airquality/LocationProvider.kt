@@ -8,6 +8,7 @@ import android.location.LocationManager
 import androidx.core.app.ActivityCompat
 import java.lang.Exception
 
+// GPS 나 네트워크의 위치를 사용하여 위도와 경도를 가져옴
 class LocationProvider(val context : Context) {
     // 현재 위치 정보를 저장하는 변수로, 초기값은 null
     private var location : Location? = null
