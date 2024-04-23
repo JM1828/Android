@@ -16,7 +16,7 @@ import androidx.room.Query;
 interface TodoDao {
 
     // 모든 TodoEntity를 가져오는 메서드를 정의
-    @Query("SELECT * FROM TodoEntity ORDER BY importance")
+    @Query("SELECT * FROM todo ORDER BY importance")
     fun getAllTodo() : List<TodoEntity>
 
     // 데이터베이스에 데이터를 삽입하는 메서드를 정의

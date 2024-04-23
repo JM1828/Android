@@ -53,7 +53,7 @@ class TodoRecyclerViewAdapter(
         // 해당 뷰 홀더의 tv_importance에는 todoData의 중요도를 문자열로 변환하여 설정
         holder.tv_importance.text = todoData.importance.toString()
         // 해당 뷰 홀더의 tv_title에는 todoData의 제목을 설정
-        holder.tv_title.text = todoData.title
+        holder.tv_title.text = todoData.todoContent
 
         holder.root.setOnLongClickListener {
             // 롱 클릭 이벤트가 발생하면 listener를 통해 해당 위치(position)를 전달하여 처리
