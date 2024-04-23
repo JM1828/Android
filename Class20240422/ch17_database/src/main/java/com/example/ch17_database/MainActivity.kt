@@ -1,9 +1,11 @@
 package com.example.ch17_database
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -14,26 +16,47 @@ import com.example.ch17_database.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityMainBinding
-    var datas: MutableList<String>? = null
+    private var datas: MutableList<String> = mutableListOf()
     lateinit var adapter: MyAdapter
+    private lateinit var detailActivityLauncher: ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding= ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        detailActivityLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.let { data ->
+                    val updatedItem = data.getStringExtra("updatedItem")
+                    val itemPosition = data.getIntExtra("itemPosition", -1)
+
+                    if (updatedItem != null && itemPosition != -1) {
+                        // 데이터 리스트 업데이트
+                        datas[itemPosition] = updatedItem
+                        // Adapter에 데이터가 변경되었다고 알림
+                        adapter.notifyItemChanged(itemPosition)
+                    }
+                }
+            }
+        }
+
         val requestLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult())
-        {
-            it.data!!.getStringExtra("result")?.let {
-                datas?.add(it)
-                adapter.notifyDataSetChanged()
+            ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.getStringExtra("result")?.let { updatedData ->
+                    datas?.add(updatedData)
+                    adapter.notifyDataSetChanged()
+                }
             }
         }
         binding.mainFab.setOnClickListener {
             val intent = Intent(this, AddActivity::class.java)
             requestLauncher.launch(intent)
         }
+
 
         datas = mutableListOf<String>()
 
@@ -56,7 +79,7 @@ class MainActivity : AppCompatActivity() {
         // RecyclerView에 방금 생성한 레이아웃 매니저를 설정
         binding.mainRecyclerView.layoutManager = layoutManager
         // 데이터를 표시하기 위한 어댑터를 생성, datas는 RecyclerView에 표시될 데이터를 담고 있는 리스트
-        adapter = MyAdapter(datas)
+        adapter = MyAdapter(datas, detailActivityLauncher)
         // 방금 생성한 어댑터를 RecyclerView에 설정
         binding.mainRecyclerView.adapter = adapter
         // RecyclerView 아이템 사이에 구분선을 추가, 여기서는 수직 방향으로 구분선을 추가
