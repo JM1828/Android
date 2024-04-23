@@ -1,29 +1,35 @@
 package com.example.todolist.db
 
-import androidx.room.Dao;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.Query;
+import com.google.android.gms.tasks.Task
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.Query
 
-/*
-@Dao
-- 데이터 삽입, 갱신, 삭제, 조회 등의 데이터베이스 조작 기능을 메서드로 정의
-- SQL 쿼리를 사용하여 데이터를 가져오는 메서드를 정의
-- Room 라이브러리는 DAO에 정의된 메서드를 기반으로 데이터베이스 쿼리를 생성하고 실행
- */
+class TodoDao {
+    private var databaseReference: DatabaseReference? = null
 
-@Dao
-interface TodoDao {
+    init {
+        val db = FirebaseDatabase.getInstance()
+        databaseReference = db.getReference("todo")
+    }
 
-    // 모든 TodoEntity를 가져오는 메서드를 정의
-    @Query("SELECT * FROM todo ORDER BY importance")
-    fun getAllTodo() : List<TodoEntity>
+    // 등록
+    fun add(todo: Todo?): Task<Void> {
+        return databaseReference!!.push().setValue(todo)
+    }
 
-    // 데이터베이스에 데이터를 삽입하는 메서드를 정의
-    @Insert
-    fun insertTodo(todo : TodoEntity)
+    // 조회
+    fun getTodoList(): Query?{
+        return databaseReference
+    }
 
-    // 데이터베이스에서 데이터를 삭제하는 메서드를 정의
-    @Delete
-    fun deleteTodo(todo : TodoEntity)
+    // 수정
+    fun todoUpdate(key: String, hashMap: HashMap<String, Any>): Task<Void> {
+        return databaseReference!!.child(key)!!.updateChildren(hashMap)
+    }
+
+    // 삭제
+    fun todoDelete(key: String): Task<Void> {
+        return databaseReference!!.child(key).removeValue()
+    }
 }

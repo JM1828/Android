@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1002280790057",
+    "project_id": "fir-crud-e0730",
+    "storage_bucket": "fir-crud-e0730.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1002280790057:android:25310ea61541dc40035438",
+        "android_client_info": {
+          "package_name": "com.junmo.firebasecrud"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6_VW4hl-9rSYfkxTkKVdvuwZCehjPsC0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
