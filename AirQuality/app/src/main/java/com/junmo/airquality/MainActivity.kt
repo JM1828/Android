@@ -161,23 +161,19 @@ class MainActivity : AppCompatActivity() {
                 binding.tvTitle.text = "좋음"
                 binding.imgBg.setImageResource(R.drawable.bg_good)
             }
-
             in 51..150 -> {
                 binding.tvTitle.text = "보통"
                 binding.imgBg.setImageResource(R.drawable.bg_soso)
             }
-
             in 151..200 -> {
                 binding.tvTitle.text = "나쁨"
                 binding.imgBg.setImageResource(R.drawable.bg_bad)
             }
-
             else -> {
                 binding.tvTitle.text = "매우 나쁨"
                 binding.imgBg.setImageResource(R.drawable.bg_worst)
             }
         }
-
     }
 
     // 새로고침 버튼을 눌렀을때 updateUI 함수를 실행
