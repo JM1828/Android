@@ -23,10 +23,10 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val datas = mutableListOf<String>()
-        datas.add("아이템 1")
-        datas.add("아이템 2")
-        datas.add("아이템 3")
+//        val datas = mutableListOf<String>()
+//        datas.add("아이템 1")
+//        datas.add("아이템 2")
+//        datas.add("아이템 3")
 
         // 뷰페이저 어댑터에 적용
         // 리사이클러 어댑터 이용
@@ -52,8 +52,6 @@ class MyFragmentPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(
     override fun createFragment(position: Int): Fragment {
        return fragment[position]
     }
-
-
 }
 
 // 리사이클러 어댑터 이용

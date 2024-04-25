@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/main1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
@@ -32,20 +32,21 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal|center_vertical"
         android:lineSpacingExtra="3sp"
-        android:text="Weather"
+        android:text="Air Quality"
+        android:textStyle="bold"
         android:textColor="#404040"
         android:textSize="36sp"
         app:layout_constraintBottom_toBottomOf="@+id/rectangle_9"
-        app:layout_constraintEnd_toStartOf="@id/Air_icon"
+        app:layout_constraintEnd_toStartOf="@id/weatherIcon"
         app:layout_constraintStart_toEndOf="@id/menu_icon"
         app:layout_constraintTop_toTopOf="@id/rectangle_9" />
 
     <ImageView
-        android:id="@+id/Air_icon"
+        android:id="@+id/weatherIcon"
         android:layout_width="53dp"
         android:layout_height="53dp"
         android:layout_marginEnd="10dp"
-        android:src="@drawable/icon_air"
+        android:src="@drawable/icon_weather"
         app:layout_constraintBottom_toBottomOf="@+id/rectangle_9"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/rectangle_9" />
@@ -55,6 +56,7 @@
         android:layout_height="80dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
+        android:layout_marginTop="40dp"
         app:cardBackgroundColor="#FBDADE"
         app:cardCornerRadius="20dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -70,81 +72,62 @@
                 android:id="@+id/location"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_marginStart="20dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="40dp"
                 android:layout_marginTop="20dp"
-                android:layout_marginEnd="60dp"
-                android:layout_toStartOf="@+id/tv_location_title"
                 android:src="@drawable/icon_location1" />
-
-            <TextView
-                android:id="@+id/tv_location_subtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:gravity="center_vertical"
-                android:letterSpacing="-0.05"
-                android:lineSpacingExtra="2sp"
-                android:text="대한민국 서울특별시"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/tv_location_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
+                android:layout_above="@+id/tv_location_subtitle"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="0dp"
                 android:letterSpacing="-0.05"
                 android:text="예시용"
                 android:textColor="@color/black"
-                android:textSize="32sp"
+                android:textSize="25sp"
                 android:textStyle="bold" />
 
+            <TextView
+                android:id="@+id/tv_location_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:gravity="center_vertical"
+                android:letterSpacing="-0.05"
+                android:layout_marginBottom="10dp"
+                android:lineSpacingExtra="2sp"
+                android:text="대한민국 서울특별시"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
 
             <ImageView
                 android:id="@+id/search_icon"
                 android:layout_width="35dp"
                 android:layout_height="35dp"
-                android:layout_marginStart="60dp"
+                android:layout_alignParentEnd="true"
                 android:layout_marginTop="20dp"
-                android:layout_marginEnd="20dp"
-                android:layout_toEndOf="@+id/tv_location_title"
+                android:layout_marginEnd="40dp"
                 android:src="@drawable/icon_search" />
 
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
-            <!--            <TextView-->
-            <!--                android:id="@+id/some_id"-->
-            <!--                android:layout_width="wrap_content"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:layout_centerInParent="true"-->
-            <!--                android:text="some_id"-->
-            <!--                android:textColor="#404040"-->
-            <!--                android:textSize="20dp" />-->
 
-
-
-            <TextView
-                android:id="@+id/tv_check_time_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:letterSpacing="-0.05"
-                android:text="@string/measured_at"
-                android:textColor="@color/text_light_grey"
-                android:textSize="13sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/img_bg" />
-
-            <ImageView
-                android:layout_width="10dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="9dp"
-                android:src="@drawable/icon_thunder"
-                app:layout_constraintBottom_toBottomOf="@id/tv_location_title"
-                app:layout_constraintStart_toEndOf="@+id/tv_location_title"
-                app:layout_constraintTop_toTopOf="@+id/tv_location_title" />
-
+    <TextView
+        android:id="@+id/tv_check_time_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:letterSpacing="-0.05"
+        android:text="@string/measured_at"
+        android:textColor="@color/text_light_grey"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/img_bg" />
 
     <ImageView
         android:id="@+id/img_bg"
@@ -157,7 +140,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/guideline2"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.498" />
+        app:layout_constraintVertical_bias="0.552" />
 
     <TextView
         android:id="@+id/tv_count"
@@ -201,7 +184,7 @@
         android:id="@+id/btn_refresh"
         android:layout_width="28dp"
         android:layout_height="28dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:padding="5dp"
         android:src="@drawable/icon_refresh"
         app:layout_constraintEnd_toEndOf="parent"
@@ -224,21 +207,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.1" />
+        app:layout_constraintGuide_percent="0.15" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.18" />
+        app:layout_constraintGuide_percent="0.22" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.82" />
+        app:layout_constraintGuide_percent="0.78" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline4"

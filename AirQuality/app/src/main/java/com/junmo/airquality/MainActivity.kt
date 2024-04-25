@@ -19,10 +19,17 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import com.junmo.OneFragment
+import com.junmo.TwoFragment
 import com.junmo.airquality.databinding.ActivityMainBinding
 import com.junmo.airquality.retrofit.AirQualityResponse
 import com.junmo.airquality.retrofit.AirQualityService
 import com.junmo.airquality.retrofit.RetrofitConnection
+import com.junmo.weather.WeatherActivity
 import retrofit2.Call
 import retrofit2.Response
 import java.io.IOException
@@ -72,11 +79,15 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.weatherIcon.setOnClickListener {
+            val intent = Intent(this, WeatherActivity::class.java)
+            startActivity(intent)
+        }
+
         // 앱이 실행될 때, onCreate() 함수가 호출되면서 checkAllPermissions() 함수가 실행
         checkAllPermissions()
         updateUI()
         setRefreshButton()
-
         setFab()
     }
 

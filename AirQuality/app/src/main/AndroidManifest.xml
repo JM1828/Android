@@ -17,13 +17,12 @@
         android:theme="@style/Theme.AirQuality"
         tools:targetApi="31">
         <activity
-            android:name="com.junmo.weather.WeatherActivity"
+            android:name="com.junmo.FragmentActivity"
             android:exported="true" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.junmo.weather.WeatherActivity"
+            android:exported="true">
         </activity>
         <activity
             android:name=".MapActivity"
@@ -36,6 +35,11 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 
