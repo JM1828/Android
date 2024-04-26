@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -21,7 +22,6 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
-private val PERMISSIONS_REQUEST_CODE = 100
     lateinit var binding: ActivityMapBinding
 
     private var mMap: GoogleMap? = null
@@ -48,6 +48,7 @@ private val PERMISSIONS_REQUEST_CODE = 100
     }
 
     private fun setButton() {
+        // "사용자 위치 설정" 버튼 클릭 시
         binding.btnCheckHere.setOnClickListener {
             mMap?.let {
                 val intent = Intent()
@@ -58,41 +59,51 @@ private val PERMISSIONS_REQUEST_CODE = 100
             }
         }
 
+        // 검색 창 클릭 시
         binding.searchEdittext.setOnClickListener {
-            val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
-            val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
-                .build(this)
-            startActivityForResult(intent, PERMISSIONS_REQUEST_CODE)
+            startPlaceAutocompleteActivity()
         }
 
+        // 현재 위치로 이동하는 FAB 클릭 시
         binding.fabCurrentLocation.setOnClickListener {
-            val locationProvider = LocationProvider(this)
-            val latitude = locationProvider.getLocationLatitude()
-            val longitude = locationProvider.getLocationLongitude()
-
-            mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(latitude!!,longitude!!), 16f))
-            setMarker()
+            moveToCurrentLocation()
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PERMISSIONS_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                val place = Autocomplete.getPlaceFromIntent(data!!)
-                // 검색 결과를 올바르게 받았을 때 맵을 이동시키는 코드
-                mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(place.latLng, 16f))
-                setMarker()
-            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-                // 검색 중 오류가 발생했을 때의 처리
-                val status = Autocomplete.getStatusFromIntent(data!!)
-                Log.e("MapActivity", status.statusMessage!!)
-            } else if (resultCode == Activity.RESULT_CANCELED) {
-                // 사용자가 검색을 취소했을 때의 처리
-                Log.d("MapActivity", "사용자가 검색을 취소했습니다.")
+    private fun startPlaceAutocompleteActivity() {
+        val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG)
+        val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+            .build(this)
+        startForResult.launch(intent)
+    }
+
+    private fun moveToCurrentLocation() {
+        val locationProvider = LocationProvider(this)
+        val latitude = locationProvider.getLocationLatitude()
+        val longitude = locationProvider.getLocationLongitude()
+
+        mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(latitude!!, longitude!!), 16f))
+        setMarker()
+    }
+
+    private val startForResult =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            val data: Intent? = result.data
+            when (result.resultCode) {
+                Activity.RESULT_OK -> {
+                    val place = Autocomplete.getPlaceFromIntent(data!!)
+                    mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(place.latLng, 16f))
+                    setMarker()
+                }
+                AutocompleteActivity.RESULT_ERROR -> {
+                    val status = Autocomplete.getStatusFromIntent(data!!)
+                    Log.e("MapActivity", status.statusMessage ?: "Error occurred")
+                }
+                Activity.RESULT_CANCELED -> {
+                    Log.d("MapActivity", "User canceled the operation")
+                }
             }
         }
-    }
 
     override fun onMapReady(googleMap: GoogleMap) {
 

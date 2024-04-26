@@ -22,7 +22,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.junmo.airquality.LocationProvider
-import com.junmo.airquality.MainActivity
+//import com.junmo.airquality.MainActivity
+//import com.junmo.airquality.MainActivity
 import com.junmo.airquality.MapActivity
 import com.junmo.airquality.R
 import com.junmo.airquality.databinding.ActivityWeatherBinding
@@ -47,7 +48,8 @@ class WeatherActivity : AppCompatActivity() {
     lateinit var binding: ActivityWeatherBinding
     lateinit var locationProvider: LocationProvider
 
-    private val LOCATION_PERMISSION_REQUEST_CODE = 1001
+    // 위치 권한 요청에 사용되는 요청 코드를 정의
+    private val PERMISSIONS_REQUEST_CODE = 100
 
     var latitude: Double? = 0.0
     var longitude: Double? = 0.0
@@ -83,10 +85,12 @@ class WeatherActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.AirIcon.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+//            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
 
+        checkAllPermissions()
+        setRefreshButton()
         updateUI()
         setFab()
     }
@@ -134,7 +138,8 @@ class WeatherActivity : AppCompatActivity() {
                 response: Response<AirQualityResponse>
             ) {
                 if (response.isSuccessful) {
-                    Toast.makeText(this@WeatherActivity, "최신 데이터 업데이트 완료!", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@WeatherActivity, "최신 데이터 업데이트 완료!", Toast.LENGTH_LONG)
+                        .show()
                     // 응답에 body 값이 null 이 아니면 UI를 업데이트
                     response.body()?.let { updateWeatherUI(it) }
                 } else {
@@ -145,7 +150,8 @@ class WeatherActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<AirQualityResponse>, t: Throwable) {
                 t.printStackTrace()
-                Toast.makeText(this@WeatherActivity, "데이터를 가져오는 데 실패했습니다.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@WeatherActivity, "데이터를 가져오는 데 실패했습니다.", Toast.LENGTH_LONG)
+                    .show()
             }
         })
     }
@@ -270,7 +276,7 @@ class WeatherActivity : AppCompatActivity() {
             ActivityCompat.requestPermissions(
                 this,
                 REQUIRED_PERMISSIONS,
-                LOCATION_PERMISSION_REQUEST_CODE
+                PERMISSIONS_REQUEST_CODE
             )
         }
     }
@@ -324,7 +330,7 @@ class WeatherActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         // "requestCode"와 "grantResults" 배열의 크기를 확인하여 요청 코드와 권한 부여 결과의 크기가 일치하는지 확인
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE && grantResults.size == REQUIRED_PERMISSIONS.size) {
+        if (requestCode == PERMISSIONS_REQUEST_CODE && grantResults.size == REQUIRED_PERMISSIONS.size) {
             var checkResult = true
 
             // 모든 권한이 부여되었는지 확인하기 위해 "grantResults" 배열을 순회하면서 권한이 부여되었는지 확인
@@ -350,104 +356,4 @@ class WeatherActivity : AppCompatActivity() {
             }
         }
     }
-
-//    override fun onRequestPermissionsResult(
-//        requestCode: Int,
-//        permissions: Array<out String>,
-//        grantResults: IntArray
-//    ) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                // 권한이 허용된 경우
-//                val locationProvider = LocationProvider(this)
-//                val latitude = locationProvider.getLocationLatitude()
-//                val longitude = locationProvider.getLocationLongitude()
-//                if (latitude != null && longitude != null) {
-//                    startWeatherTask(latitude, longitude)
-//                }
-//            } else {
-//                // 권한이 거부된 경우 처리
-//                Toast.makeText(this, "위치 권한을 허용해야 날씨 정보를 확인할 수 있습니다.", Toast.LENGTH_LONG).show()
-//            }
-//        }
-//    }
-//
-//    private fun startWeatherTask(latitude: Double, longitude: Double) {
-//        val url =
-//            "https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${API}&lang=kr"
-//        WeatherTask().execute(url)
-//    }
-//
-//    inner class WeatherTask : AsyncTask<String, Void, String>() {
-//        override fun doInBackground(vararg params: String?): String? {
-//            val url = params[0]
-//            return try {
-//                URL(url).readText(Charsets.UTF_8)
-//            } catch (e: Exception) {
-//                null
-//            }
-//        }
-//
-//        override fun onPostExecute(result: String?) {
-//            super.onPostExecute(result)
-//            try {
-//                // JSON 객체에서 각각의 필요한 정보를 가져옴
-//                val jsonObj = JSONObject(result)
-//                val main = jsonObj.getJSONObject("main")
-//                val sys = jsonObj.getJSONObject("sys")
-//                val wind = jsonObj.getJSONObject("wind")
-//                val weather = jsonObj.getJSONArray("weather").getJSONObject(0)
-//
-//                // JSON 객체에서 "dt" 키에 해당하는 값을 가져와 updatedAt에 저장
-//                val updatedAt: Long = jsonObj.getLong("dt")
-//                // updatedAt를 "yyyy/MM/dd a hh:mm" 형식의 문자열로 변환하여 updatedAtText에 저장
-//                val updatedAtText =
-//                    SimpleDateFormat("yyyy/MM/dd a hh:mm", Locale.KOREA).apply {
-//                        timeZone = TimeZone.getTimeZone("Asia/Seoul")
-//                    }.format(Date(updatedAt * 1000))
-//
-//                // 각각의 기상 정보를 가져와 변수에 저장
-//                val temp = main.getString("temp") + "°C"
-//                val tempMin = "Min Temp: " + main.getString("temp_min") + "°C"
-//                val tempMax = "Max Temp: " + main.getString("temp_max") + "°C"
-//                val pressure = main.getString("pressure")
-//                val humidity = main.getString("humidity")
-//
-//                // 일출, 일몰, 풍속, 날씨 설명 등의 정보를 가져와 변수에 저장
-//                val sunrise: Long = sys.getLong("sunrise")
-//                val sunset: Long = sys.getLong("sunset")
-//                val windSpeed = wind.getString("speed")
-//                val weatherDescription = weather.getString("description")
-//
-//                // 도시 이름과 국가 코드를 조합하여 address에 저장
-//                val address = jsonObj.getString("name") + ", " + sys.getString("country")
-//
-//                // 바인딩을 사용하여 해당 정보를 화면의 특정 텍스트뷰에 나타냄
-//                binding.address.text = address
-//                binding.updatedAt.text = updatedAtText
-//                binding.status.text = weatherDescription.capitalize()
-//                binding.temp.text = temp
-//                binding.tempMin.text = tempMin
-//                binding.tempMax.text = tempMax
-//
-//                binding.sunrise.text =
-//                    SimpleDateFormat("hh:mm a", Locale.KOREA).apply {
-//                        timeZone = TimeZone.getTimeZone("Asia/Seoul")
-//                    }.format(Date(sunrise * 1000))
-//
-//                binding.sunset.text =
-//                    SimpleDateFormat("hh:mm a", Locale.KOREA).apply {
-//                        timeZone = TimeZone.getTimeZone("Asia/Seoul")
-//                    }.format(Date(sunset * 1000))
-//
-//                binding.wind.text = windSpeed
-//                binding.pressure.text = pressure
-//                binding.humidity.text = humidity
-//
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//            }
-//        }
-//    }
 }

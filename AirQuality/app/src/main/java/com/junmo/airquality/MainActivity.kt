@@ -19,12 +19,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.viewpager2.adapter.FragmentStateAdapter
-import androidx.viewpager2.widget.ViewPager2
 import com.junmo.OneFragment
-import com.junmo.TwoFragment
 import com.junmo.airquality.databinding.ActivityMainBinding
 import com.junmo.airquality.retrofit.AirQualityResponse
 import com.junmo.airquality.retrofit.AirQualityService
@@ -68,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                     if (result?.resultCode ?: 0 == Activity.RESULT_OK) {
                         latitude = result?.data?.getDoubleExtra("latitude", 0.0) ?: 0.0
                         longitude = result?.data?.getDoubleExtra("longitude", 0.0) ?: 0.0
-                        updateUI()
+//                        updateUI()
                     }
                 }
             }
@@ -86,12 +81,13 @@ class MainActivity : AppCompatActivity() {
 
         // 앱이 실행될 때, onCreate() 함수가 호출되면서 checkAllPermissions() 함수가 실행
         checkAllPermissions()
-        updateUI()
         setRefreshButton()
+        updateUI()
+
         setFab()
     }
 
-    // 현재 위치 정보를 가져와 UI를 업데이트
+     // 현재 위치 정보를 가져와 UI를 업데이트
     private fun updateUI() {
         // LocationProvider를 초기화하여 현재 위치 정보를 가져옴
         locationProvider = LocationProvider(this)
@@ -190,7 +186,7 @@ class MainActivity : AppCompatActivity() {
     // 새로고침 버튼을 눌렀을때 updateUI 함수를 실행
     private fun setRefreshButton() {
         binding.btnRefresh.setOnClickListener {
-            updateUI()
+//            updateUI()
         }
     }
 
@@ -298,7 +294,7 @@ class MainActivity : AppCompatActivity() {
             // 만약 모든 권한이 부여되었다면 "위치값을 가져올 수 있음"이라는 처리
             if (checkResult) {
                 // 위치값을 가져올 수 있음
-                updateUI()
+//                updateUI()
             } else {
                 // 그렇지 않을 경우 "퍼미션이 거부되었습니다. 앱을 실행하여 퍼미션을 허용해주세요."라는 메시지를 사용자에게 보여주고 앱을 종료
                 Toast.makeText(
