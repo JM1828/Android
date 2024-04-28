@@ -37,17 +37,17 @@ class LocationProvider(val context : Context) {
             if (!isGPSEnabled && !isNetworkEnabled) {
                 return null
             } else {
-                    // 위치 권한이 부여되지 않은 경우, null을 반환
-                    if (ActivityCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                        ) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        return null
-                    }
+                // 위치 권한이 부여되지 않은 경우, null을 반환
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    return null
+                }
 
                 // 네트워크 위치가 활성화되어 있는 경우
                 if (isNetworkEnabled) {

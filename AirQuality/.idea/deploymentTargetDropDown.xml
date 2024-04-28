@@ -2,13 +2,19 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="ChosenActivity">
+        <State />
+      </entry>
+      <entry key="FragmentActivity">
+        <State />
+      </entry>
+      <entry key="FragmentActivity (1)">
+        <State />
+      </entry>
       <entry key="MainActivity">
         <State />
       </entry>
       <entry key="WeatherActivity">
-        <State />
-      </entry>
-      <entry key="app">
         <State />
       </entry>
     </value>

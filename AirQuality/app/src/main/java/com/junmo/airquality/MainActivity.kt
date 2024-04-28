@@ -19,7 +19,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.junmo.OneFragment
 import com.junmo.airquality.databinding.ActivityMainBinding
 import com.junmo.airquality.retrofit.AirQualityResponse
 import com.junmo.airquality.retrofit.AirQualityService
@@ -63,7 +62,7 @@ class MainActivity : AppCompatActivity() {
                     if (result?.resultCode ?: 0 == Activity.RESULT_OK) {
                         latitude = result?.data?.getDoubleExtra("latitude", 0.0) ?: 0.0
                         longitude = result?.data?.getDoubleExtra("longitude", 0.0) ?: 0.0
-//                        updateUI()
+                        updateUI()
                     }
                 }
             }
@@ -125,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         retrofitAPI.getAirQualityData(
             latitude.toString(),
             longitude.toString(),
-            "2d32be22-a9fc-41b7-8d13-85c79fc1272b"
+            "6f2b8d8a-8a16-4ec5-837c-fc3b884b7829"
         ).enqueue(object : retrofit2.Callback<AirQualityResponse> {
             // 응답이 성공적이면 사용자에게 메시지를 표시하고, 받은 데이터를 UI에 업데이트하는 updateAirUI 함수를 호출
             override fun onResponse(
@@ -186,7 +185,7 @@ class MainActivity : AppCompatActivity() {
     // 새로고침 버튼을 눌렀을때 updateUI 함수를 실행
     private fun setRefreshButton() {
         binding.btnRefresh.setOnClickListener {
-//            updateUI()
+            updateUI()
         }
     }
 
@@ -294,7 +293,7 @@ class MainActivity : AppCompatActivity() {
             // 만약 모든 권한이 부여되었다면 "위치값을 가져올 수 있음"이라는 처리
             if (checkResult) {
                 // 위치값을 가져올 수 있음
-//                updateUI()
+                updateUI()
             } else {
                 // 그렇지 않을 경우 "퍼미션이 거부되었습니다. 앱을 실행하여 퍼미션을 허용해주세요."라는 메시지를 사용자에게 보여주고 앱을 종료
                 Toast.makeText(

@@ -8,10 +8,8 @@ import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
 import android.location.LocationManager
-import android.os.AsyncTask
 import android.os.Bundle
 import android.provider.Settings
-import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
@@ -30,14 +28,10 @@ import com.junmo.airquality.databinding.ActivityWeatherBinding
 import com.junmo.airquality.retrofit.AirQualityResponse
 import com.junmo.airquality.retrofit.AirQualityService
 import com.junmo.airquality.retrofit.RetrofitConnection
-import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Response
 import java.io.IOException
 import java.lang.IllegalArgumentException
-import java.net.URL
-import java.text.SimpleDateFormat
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter

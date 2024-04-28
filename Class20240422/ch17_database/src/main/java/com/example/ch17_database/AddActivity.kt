@@ -1,6 +1,7 @@
 package com.example.ch17_database
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -8,41 +9,40 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.ch17_database.databinding.ActivityAddBinding
 
 class AddActivity : AppCompatActivity() {
-    lateinit var binding: ActivityAddBinding
+    // 뷰 바인딩 객체 선언
+    private lateinit var binding: ActivityAddBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 뷰 바인딩 초기화 및 레이아웃 설정
         binding = ActivityAddBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        // menuInflater를 사용하여 menu_add라는 메뉴 리소스를 inflate하여 옵션 메뉴를 생성
+        // 옵션 메뉴 생성을 위해 menu_add 리소스를 inflate
         menuInflater.inflate(R.menu.menu_add, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean =
-        // item.itemId를 통해 선택된 메뉴 아이템의 ID를 확인하고, R.id.menu_add_save인 경우에는 특정 동작을 수행
         when (item.itemId) {
-            // menu_add_save 아이템이 선택되었을 때, binding.addEditView에서 텍스트를 가져와 inputData에 저장
             R.id.menu_add_save -> {
+                // '저장' 메뉴 아이템 선택 시 수행할 동작
+                // EditText에서 사용자 입력 텍스트를 가져옴
                 val inputData = binding.addEditView.text.toString()
-                // 데이터베이스를 열어 앱이나 사용자의 입력에 대한 데이터를 저장하거나 가져오기 위한 목적으로 사용
-                val db = DBHelper(this).writableDatabase
-                // TODO_TB라는 테이블에 inputData 값을 todo 열에 삽입하는 INSERT 쿼리를 실행
-                db.execSQL(
-                    "insert into TODO_TB (todo) values (?)",
-                    arrayOf<String>(inputData)
-                )
-                db.close()
-                val intent = intent
-                // Intent에 "result"라는 이름으로 inputData를 추가
-                intent.putExtra("result", inputData)
-                // setResult를 사용하여 현재 액티비티의 결과를 설정하고, Activity.RESULT_OK를 반환
-                setResult(Activity.RESULT_OK, intent)
-                finish()
-                true
+                // DBHelper를 사용하여 데이터베이스에 쓰기 가능한 인스턴스 획득
+                DBHelper(this).writableDatabase.use { db ->
+                    // TODO_TB 테이블에 새로운 할 일(todo) 추가
+                    db.execSQL("INSERT INTO TODO_TB (todo) VALUES (?)", arrayOf(inputData))
+                }
+                // 결과를 인텐트에 담아서 설정하고 액티비티 종료
+                setResult(Activity.RESULT_OK, Intent().apply {
+                    putExtra("result", inputData)
+                })
+                finish() // 액티비티 종료
+                true // 이벤트 처리 완료
             }
-            else -> true
+
+            else -> super.onOptionsItemSelected(item) // 그 외의 항목은 기본 처리 방식을 따름
         }
 }

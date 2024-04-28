@@ -72,14 +72,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/location"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="40dp"
-                android:layout_marginTop="20dp"
-                android:src="@drawable/icon_location1" />
+<!--            <ImageView-->
+<!--                android:id="@+id/location"-->
+<!--                android:layout_width="35dp"-->
+<!--                android:layout_height="35dp"-->
+<!--                android:layout_alignParentStart="true"-->
+<!--                android:layout_marginStart="40dp"-->
+<!--                android:layout_marginTop="20dp"-->
+<!--                android:src="@drawable/icon_location1" />-->
 
             <TextView
                 android:id="@+id/tv_location_title"
@@ -115,7 +115,7 @@
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="40dp"
-                android:src="@drawable/icon_search" />
+                android:src="@drawable/icon_location1" />
 
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
@@ -194,17 +194,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_check_time" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="23dp"
-        android:layout_marginBottom="30dp"
-        android:src="@drawable/icon_map"
-        app:borderWidth="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline1"
