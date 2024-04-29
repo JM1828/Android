@@ -1,4 +1,4 @@
-package com.example.airandweather
+package com.example.airandweather.AirAndWeather
 
 import android.Manifest
 import android.content.Context
