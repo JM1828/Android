@@ -1,6 +1,7 @@
 package com.example.airandweather
 
 import android.Manifest
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -8,15 +9,15 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.example.airandweather.AirAndWeather.FragmentActivity
+import com.example.airandweather.AirAndWeather.OneFragment
+import com.example.airandweather.Login.LoginActivity
 import com.example.airandweather.databinding.ActivityChosenBinding
 
 class ChosenActivity : AppCompatActivity() {
@@ -40,10 +41,21 @@ class ChosenActivity : AppCompatActivity() {
         binding = ActivityChosenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        loginUpdateUI() // 엑티비티가 생성될 때 UI 업데이트
+
         // 날씨 및 공기질 정보 보기 클릭 이벤트 설정
         binding.weatherView.setOnClickListener {
-            val intent = Intent(this, FragmentActivity::class.java)
-            startActivity(intent)
+            val isLoggedIn = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+                .getBoolean("IsLoggedIn", false)
+
+            if (isLoggedIn) {
+                // 로그인 상태인 경우, FragmentActivity로 이동
+                val intent = Intent(this, FragmentActivity::class.java)
+                startActivity(intent)
+            } else {
+                // 로그인되지 않은 경우, 로그인 필요 메시지 표시
+                Toast.makeText(this, "로그인 후 이용 가능합니다.", Toast.LENGTH_LONG).show()
+            }
         }
 
         // 모든 권한 요청 체크
@@ -61,6 +73,27 @@ class ChosenActivity : AppCompatActivity() {
                 Toast.makeText(this, "위치 서비스를 사용할 수 없습니다.", Toast.LENGTH_LONG).show()
                 finish()
             }
+        }
+    }
+
+    // 로그인 상태 변경 UI 업데이트
+    private fun loginUpdateUI() {
+        val isLoggedIn = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+            .getBoolean("IsLoggedIn", false)
+
+        binding.textLogin.text = if (isLoggedIn) "LOGOUT" else "LOGIN"
+        binding.placeBlock1.setOnClickListener {
+            val prefs = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE).edit()
+            if (isLoggedIn) {
+                // 로그아웃 로직
+                prefs.putBoolean("IsLoggedIn", false).apply()
+                Toast.makeText(this, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
+            } else {
+                // 로그인 페이지로 이동
+                val intent = Intent(this, LoginActivity::class.java)
+                startActivity(intent)
+            }
+            loginUpdateUI() // 로그인 상태 변경 후 UI 업데이트
         }
     }
 

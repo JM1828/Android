@@ -1,28 +1,19 @@
-package com.example.airandweather
+package com.example.airandweather.AirAndWeather
 
-import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
-import android.location.LocationManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.provider.Settings
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.airandweather.R
 import com.example.airandweather.databinding.FragmentOneBinding
 import com.example.airandweather.databinding.FragmentTwoBinding
 import com.example.airandweather.retrofit.AirQualityResponse
@@ -33,7 +24,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class TwoFragment : Fragment() {
+class OneFragment : Fragment() {
     // 뷰모델 및 바인딩 변수 선언
     private lateinit var viewModel: LocationViewModel
     private lateinit var airBinding: FragmentOneBinding
@@ -64,14 +55,14 @@ class TwoFragment : Fragment() {
 
         // 주소 텍스트에 대한 LiveData를 관찰하고 UI를 업데이트
         viewModel.addressTextLiveData.observe(viewLifecycleOwner, Observer { addressText ->
-            weatherBinding.tvLocationTitle.text = addressText
+            airBinding.tvLocationTitle.text = addressText
         })
 
         // 위치 소제목에 대한 LiveData를 관찰하고 UI를 업데이트
         viewModel.locationSubtitleLiveData.observe(
             viewLifecycleOwner,
             Observer { locationSubtitle ->
-                weatherBinding.tvLocationSubtitle.text = locationSubtitle
+                airBinding.tvLocationSubtitle.text = locationSubtitle
             })
 
         // 공기질 데이터에 대한 LiveData를 관찰하고 UI를 업데이트
@@ -91,10 +82,11 @@ class TwoFragment : Fragment() {
         // 추가적인 UI 업데이트를 수행
         updateUI()
 
-        // weatherBinding의 root 뷰를 반환
-        return weatherBinding.root
+        // airBinding의 root 뷰를 반환
+        return airBinding.root
     }
 
+    // onViewCreated 메서드: 뷰가 생성된 후에 호출되며, 여기서 추가적인 설정을 수행
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setRefreshButton()
@@ -102,8 +94,7 @@ class TwoFragment : Fragment() {
     }
 
     // UI 업데이트 메소드
-    private fun updateUI() {
-        // LocationProvider를 초기화하여 현재 위치 정보를 가져옴
+    fun updateUI() {
         context?.let {
             val locationProvider = LocationProvider(it)
             viewModel.updateUI(locationProvider, this::getCurrentAddress)
@@ -112,7 +103,7 @@ class TwoFragment : Fragment() {
 
     // FAB(플로팅 액션 버튼)을 설정
     private fun setFab() {
-        weatherBinding.searchIcon.setOnClickListener {
+        airBinding.searchIcon.setOnClickListener {
             val intent = Intent(requireContext(), MapActivity::class.java).apply {
                 putExtra("currentLat", viewModel.latitude)
                 putExtra("currentLng", viewModel.longitude)
@@ -139,41 +130,6 @@ class TwoFragment : Fragment() {
             Toast.makeText(context, "잘못된 위도, 경도 입니다.", Toast.LENGTH_LONG).show()
         }
         return null
-    }
-
-    // 날씨 데이터를 UI에 업데이트하는 함수
-    private fun updateWeatherUI(weatherData: AirQualityResponse.Data.Current.Weather) {
-        // 측정 시간을 'Asia/Seoul' 시간대로 변환하여 표시합니다.
-        val zonedDateTime =
-            ZonedDateTime.parse(weatherData.ts).withZoneSameInstant(ZoneId.of("Asia/Seoul"))
-        val dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd a hh:mm", Locale.KOREA)
-        weatherBinding.tvCheckTime.text = zonedDateTime.format(dateFormatter).toString()
-        // 온도, 습도, 풍속을 표시합니다.
-        weatherBinding.temp.text = "${weatherData.tp}°C"
-        weatherBinding.humidity.text = "${weatherData.hu}%"
-        weatherBinding.wind.text = "${weatherData.ws} m/s"
-        // 날씨 아이콘을 설정합니다.
-        getWeatherDescription(weatherData.ic)?.let {
-            weatherBinding.status.setImageResource(it)
-        }
-    }
-
-    // 날씨 아이콘 코드에 따른 리소스 ID 반환 함수
-    private fun getWeatherDescription(weatherIcon: String): Int? {
-        return when (weatherIcon) {
-            "01d" -> R.drawable.icon_01d  // 맑은 낮
-            "01n" -> R.drawable.icon_01n  // 맑은 밤
-            "02d" -> R.drawable.icon_02d  // 구름이 조금 있는 낮
-            "02n" -> R.drawable.icon_02n  // 구름이 조금 있는 밤
-            "03d", "03n" -> R.drawable.icon_03d  // 흐림
-            "04d", "04n" -> R.drawable.icon_04d  // 구름 많음
-            "09d", "09n" -> R.drawable.icon_09d  // 소나기
-            "10d", "10n" -> R.drawable.icon_10d  // 비
-            "11d", "11n" -> R.drawable.icon_11d  // 천둥번개
-            "13d", "13n" -> R.drawable.icon_13d  // 눈
-            "50d", "50n" -> R.drawable.icon_50d  // 안개
-            else -> null  // 일치하는 아이콘 없음
-        }
     }
 
     // 공기질 데이터를 UI에 업데이트하는 함수
@@ -211,9 +167,44 @@ class TwoFragment : Fragment() {
         }
     }
 
+    // 날씨 데이터를 UI에 업데이트하는 함수
+    private fun updateWeatherUI(weatherData: AirQualityResponse.Data.Current.Weather) {
+        // 측정 시간을 'Asia/Seoul' 시간대로 변환하여 표시합니다.
+        val zonedDateTime =
+            ZonedDateTime.parse(weatherData.ts).withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd a hh:mm", Locale.KOREA)
+        weatherBinding.tvCheckTime.text = zonedDateTime.format(dateFormatter).toString()
+        // 온도, 습도, 풍속을 표시합니다.
+        weatherBinding.temp.text = "${weatherData.tp}°C"
+        weatherBinding.humidity.text = "${weatherData.hu}%"
+        weatherBinding.wind.text = "${weatherData.ws} m/s"
+        // 날씨 아이콘을 설정합니다.
+        getWeatherDescription(weatherData.ic)?.let {
+            weatherBinding.status.setImageResource(it)
+        }
+    }
+
+    // 날씨 아이콘 코드에 따른 리소스 ID 반환 함수
+    private fun getWeatherDescription(weatherIcon: String): Int? {
+        return when (weatherIcon) {
+            "01d" -> R.drawable.icon_01d  // 맑은 낮
+            "01n" -> R.drawable.icon_01n  // 맑은 밤
+            "02d" -> R.drawable.icon_02d  // 구름이 조금 있는 낮
+            "02n" -> R.drawable.icon_02n  // 구름이 조금 있는 밤
+            "03d", "03n" -> R.drawable.icon_03d  // 흐림
+            "04d", "04n" -> R.drawable.icon_04d  // 구름 많음
+            "09d", "09n" -> R.drawable.icon_09d  // 소나기
+            "10d", "10n" -> R.drawable.icon_10d  // 비
+            "11d", "11n" -> R.drawable.icon_11d  // 천둥번개
+            "13d", "13n" -> R.drawable.icon_13d  // 눈
+            "50d", "50n" -> R.drawable.icon_50d  // 안개
+            else -> null  // 일치하는 아이콘 없음
+        }
+    }
+
     // 새로고침 버튼 설정 함수
     private fun setRefreshButton() {
-        weatherBinding.btnRefresh.setOnClickListener {
+        airBinding.btnRefresh.setOnClickListener {
             updateUI()  // UI 업데이트 메소드 호출
         }
     }

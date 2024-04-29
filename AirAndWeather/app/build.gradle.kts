@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.airandweather"
-        minSdk = 26
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.places)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -61,4 +62,10 @@ dependencies {
     implementation("com.google.android.libraries.places:places:2.4.0")
 
     implementation("androidx.fragment:fragment-ktx:1.3.0")
+
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation ("androidx.room:room-ktx:2.4.3")
+
+    kapt("androidx.room:room-compiler:$room_version")
 }

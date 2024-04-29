@@ -1,4 +1,4 @@
-package com.example.airandweather
+package com.example.airandweather.AirAndWeather
 
 import android.app.Activity
 import android.content.Intent
@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.airandweather.R
 import com.example.airandweather.databinding.FragmentOneBinding
 import com.example.airandweather.databinding.FragmentTwoBinding
 import com.example.airandweather.retrofit.AirQualityResponse
@@ -23,7 +24,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-class OneFragment : Fragment() {
+class TwoFragment : Fragment() {
     // 뷰모델 및 바인딩 변수 선언
     private lateinit var viewModel: LocationViewModel
     private lateinit var airBinding: FragmentOneBinding
@@ -54,14 +55,14 @@ class OneFragment : Fragment() {
 
         // 주소 텍스트에 대한 LiveData를 관찰하고 UI를 업데이트
         viewModel.addressTextLiveData.observe(viewLifecycleOwner, Observer { addressText ->
-            airBinding.tvLocationTitle.text = addressText
+            weatherBinding.tvLocationTitle.text = addressText
         })
 
         // 위치 소제목에 대한 LiveData를 관찰하고 UI를 업데이트
         viewModel.locationSubtitleLiveData.observe(
             viewLifecycleOwner,
             Observer { locationSubtitle ->
-                airBinding.tvLocationSubtitle.text = locationSubtitle
+                weatherBinding.tvLocationSubtitle.text = locationSubtitle
             })
 
         // 공기질 데이터에 대한 LiveData를 관찰하고 UI를 업데이트
@@ -81,11 +82,10 @@ class OneFragment : Fragment() {
         // 추가적인 UI 업데이트를 수행
         updateUI()
 
-        // airBinding의 root 뷰를 반환
-        return airBinding.root
+        // weatherBinding의 root 뷰를 반환
+        return weatherBinding.root
     }
 
-    // onViewCreated 메서드: 뷰가 생성된 후에 호출되며, 여기서 추가적인 설정을 수행
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setRefreshButton()
@@ -93,7 +93,8 @@ class OneFragment : Fragment() {
     }
 
     // UI 업데이트 메소드
-    fun updateUI() {
+    private fun updateUI() {
+        // LocationProvider를 초기화하여 현재 위치 정보를 가져옴
         context?.let {
             val locationProvider = LocationProvider(it)
             viewModel.updateUI(locationProvider, this::getCurrentAddress)
@@ -102,7 +103,7 @@ class OneFragment : Fragment() {
 
     // FAB(플로팅 액션 버튼)을 설정
     private fun setFab() {
-        airBinding.searchIcon.setOnClickListener {
+        weatherBinding.searchIcon.setOnClickListener {
             val intent = Intent(requireContext(), MapActivity::class.java).apply {
                 putExtra("currentLat", viewModel.latitude)
                 putExtra("currentLng", viewModel.longitude)
@@ -129,41 +130,6 @@ class OneFragment : Fragment() {
             Toast.makeText(context, "잘못된 위도, 경도 입니다.", Toast.LENGTH_LONG).show()
         }
         return null
-    }
-
-    // 공기질 데이터를 UI에 업데이트하는 함수
-    private fun updateAirUI(airQualityData: AirQualityResponse) {
-        val pollutionData = airQualityData.data.current.pollution
-        // AQI(공기질 지수)를 표시
-        airBinding.tvCount.text = pollutionData.aqius.toString()
-        // 측정 시간을 'Asia/Seoul' 시간대로 변환하여 표시
-        val dateTime =
-            ZonedDateTime.parse(pollutionData.ts).withZoneSameInstant(ZoneId.of("Asia/Seoul"))
-                .toLocalDateTime()
-        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-        airBinding.tvCheckTime.text = dateTime.format(dateFormatter).toString()
-        // AQI 값에 따라 UI를 업데이트
-        when (pollutionData.aqius) {
-            in 0..50 -> {
-                airBinding.tvTitle.text = "좋음"
-                airBinding.imgBg.setImageResource(R.drawable.bg_good)
-            }
-
-            in 51..150 -> {
-                airBinding.tvTitle.text = "보통"
-                airBinding.imgBg.setImageResource(R.drawable.bg_soso)
-            }
-
-            in 151..200 -> {
-                airBinding.tvTitle.text = "나쁨"
-                airBinding.imgBg.setImageResource(R.drawable.bg_bad)
-            }
-
-            else -> {
-                airBinding.tvTitle.text = "매우 나쁨"
-                airBinding.imgBg.setImageResource(R.drawable.bg_worst)
-            }
-        }
     }
 
     // 날씨 데이터를 UI에 업데이트하는 함수
@@ -201,9 +167,44 @@ class OneFragment : Fragment() {
         }
     }
 
+    // 공기질 데이터를 UI에 업데이트하는 함수
+    private fun updateAirUI(airQualityData: AirQualityResponse) {
+        val pollutionData = airQualityData.data.current.pollution
+        // AQI(공기질 지수)를 표시
+        airBinding.tvCount.text = pollutionData.aqius.toString()
+        // 측정 시간을 'Asia/Seoul' 시간대로 변환하여 표시
+        val dateTime =
+            ZonedDateTime.parse(pollutionData.ts).withZoneSameInstant(ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime()
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        airBinding.tvCheckTime.text = dateTime.format(dateFormatter).toString()
+        // AQI 값에 따라 UI를 업데이트
+        when (pollutionData.aqius) {
+            in 0..50 -> {
+                airBinding.tvTitle.text = "좋음"
+                airBinding.imgBg.setImageResource(R.drawable.bg_good)
+            }
+
+            in 51..150 -> {
+                airBinding.tvTitle.text = "보통"
+                airBinding.imgBg.setImageResource(R.drawable.bg_soso)
+            }
+
+            in 151..200 -> {
+                airBinding.tvTitle.text = "나쁨"
+                airBinding.imgBg.setImageResource(R.drawable.bg_bad)
+            }
+
+            else -> {
+                airBinding.tvTitle.text = "매우 나쁨"
+                airBinding.imgBg.setImageResource(R.drawable.bg_worst)
+            }
+        }
+    }
+
     // 새로고침 버튼 설정 함수
     private fun setRefreshButton() {
-        airBinding.btnRefresh.setOnClickListener {
+        weatherBinding.btnRefresh.setOnClickListener {
             updateUI()  // UI 업데이트 메소드 호출
         }
     }
