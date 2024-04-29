@@ -64,14 +64,14 @@ class TwoFragment : Fragment() {
 
         // 주소 텍스트에 대한 LiveData를 관찰하고 UI를 업데이트
         viewModel.addressTextLiveData.observe(viewLifecycleOwner, Observer { addressText ->
-            airBinding.tvLocationTitle.text = addressText
+            weatherBinding.tvLocationTitle.text = addressText
         })
 
         // 위치 소제목에 대한 LiveData를 관찰하고 UI를 업데이트
         viewModel.locationSubtitleLiveData.observe(
             viewLifecycleOwner,
             Observer { locationSubtitle ->
-                airBinding.tvLocationSubtitle.text = locationSubtitle
+                weatherBinding.tvLocationSubtitle.text = locationSubtitle
             })
 
         // 공기질 데이터에 대한 LiveData를 관찰하고 UI를 업데이트

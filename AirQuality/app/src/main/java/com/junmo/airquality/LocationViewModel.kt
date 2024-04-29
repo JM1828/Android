@@ -82,7 +82,7 @@ class LocationViewModel : ViewModel() {
         retrofitAPI.getAirQualityData(
             latitude.toString(),
             longitude.toString(),
-            "6f2b8d8a-8a16-4ec5-837c-fc3b884b7829" // API 키 입력
+            "2d32be22-a9fc-41b7-8d13-85c79fc1272b" // API 키 입력
         ).enqueue(object : retrofit2.Callback<AirQualityResponse> {
             override fun onResponse(
                 call: Call<AirQualityResponse>,

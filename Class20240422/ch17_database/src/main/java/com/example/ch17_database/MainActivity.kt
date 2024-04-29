@@ -37,13 +37,16 @@ class MainActivity : AppCompatActivity() {
         // DBHelper 클래스를 사용하여 읽기 가능한 데이터베이스를 가져옴
         val db = DBHelper(this).readableDatabase
         // "TODO_TB" 테이블로부터 모든 열을 선택하는 쿼리를 실행하고, 결과를 cursor에 저장
-        val cursor = db.rawQuery("select * from TODO_TB", null)
+        val cursor = db.rawQuery("select * from MEMBER_TB", null)
         // cursor의 범위 내에서 아래의 코드 블록을 실행, use를 사용하면 쿼리 결과를 처리한 후 자동으로 Cursor를 닫아줌
         cursor.use {
             // cursor가 다음 행으로 이동할 수 있는 경우까지 반복
             while (it.moveToNext()) {
-                // // 현재 행의 두 번째 열(인덱스는 0부터 시작)에 있는 값을 가져와서 datas 리스트에 추가
-                datas.add(it.getString(1))
+                // 현재 행의 이름, 나이, 핸드폰번호를 가져와서 datas 리스트에 추가
+                val name = it.getString(1)
+                val age = it.getString(2)
+                val phone = it.getString(3)
+                datas.add("$name, $age, $phone")
             }
         }
         db.close()
@@ -94,9 +97,15 @@ class MainActivity : AppCompatActivity() {
     // AddActivity의 결과 처리
     private fun handleAddActivityResult(result: ActivityResult) {
         if (result.resultCode == Activity.RESULT_OK) {
-            // 등록된 데이터를 문자열로 받아옴
-            result.data?.getStringExtra("result")?.let { updatedData ->
-                // 데이터를 삽입하고, 어댑터에 변화를 알림
+            // 등록된 데이터를 받아옴
+            val name = result.data?.getStringExtra("name")
+            val age = result.data?.getStringExtra("age")
+            val phone = result.data?.getStringExtra("phone")
+
+            // 받아온 데이터가 모두 null이 아닌 경우에 처리
+            if (name != null && age != null && phone != null) {
+                // 받아온 데이터를 활용하여 작업 수행
+                val updatedData = "${name}  ${age}  ${phone}"
                 datas.add(updatedData)
                 adapter.notifyDataSetChanged()
             }
@@ -106,17 +115,19 @@ class MainActivity : AppCompatActivity() {
     // DetailActivity의 결과 처리
     private fun handleDetailActivityResult(result: ActivityResult) {
         if (result.resultCode == Activity.RESULT_OK) {
-            // 업데이트된 데이터를 문자열로 받아옴
-            val updatedData = result.data?.getStringExtra("updatedResult")
+            // 업데이트된 데이터를 받아옴
+            val updatedName = result.data?.getStringExtra("updatedName")
+            val updatedAge = result.data?.getStringExtra("updatedAge")
+            val updatedPhone = result.data?.getStringExtra("updatedPhone")
             // 어떤 위치의 데이터가 업데이트되었는지를 가져옴
             val position = result.data?.getIntExtra("position", -1) ?: -1
             // 업데이트된 데이터가 있고, 유효한 위치가 지정된 경우
-            if (updatedData != null && position != -1) {
+            if (updatedName != null && updatedAge != null && updatedPhone != null && position != -1) {
                 // 해당 위치의 데이터를 업데이트하고, 어댑터에 변화를 알림
+                val updatedData = "$updatedName, $updatedAge, $updatedPhone"
                 datas[position] = updatedData
                 adapter.notifyItemChanged(position)
-                // 업데이트된 데이터가 없고, 유효한 위치가 지정된 경우
-            } else if (updatedData == null && position != -1) {
+            } else if (updatedName == null && updatedAge == null && updatedPhone == null && position != -1) {
                 // 해당 위치의 데이터를 삭제하고, 어댑터에 항목 삭제를 알림
                 datas.removeAt(position)
                 adapter.notifyItemRemoved(position)

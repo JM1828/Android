@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">AirAndWeather</string>
+
+    <string name="measured_at">측정 시간</string>
+
+    <string name="map_button_here">사용자 위치 설정</string>
+</resources>

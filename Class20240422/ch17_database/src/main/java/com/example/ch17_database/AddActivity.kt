@@ -29,15 +29,19 @@ class AddActivity : AppCompatActivity() {
             R.id.menu_add_save -> {
                 // '저장' 메뉴 아이템 선택 시 수행할 동작
                 // EditText에서 사용자 입력 텍스트를 가져옴
-                val inputData = binding.addEditView.text.toString()
+                val name = binding.nameEditView.text.toString()
+                val age = binding.ageEditView.text.toString()
+                val phone = binding.phoneEditView.text.toString()
                 // DBHelper를 사용하여 데이터베이스에 쓰기 가능한 인스턴스 획득
                 DBHelper(this).writableDatabase.use { db ->
                     // TODO_TB 테이블에 새로운 할 일(todo) 추가
-                    db.execSQL("INSERT INTO TODO_TB (todo) VALUES (?)", arrayOf(inputData))
+                    db.execSQL("INSERT INTO MEMBER_TB (name, age, phone) VALUES (?, ?, ?)", arrayOf(name, age, phone))
                 }
                 // 결과를 인텐트에 담아서 설정하고 액티비티 종료
                 setResult(Activity.RESULT_OK, Intent().apply {
-                    putExtra("result", inputData)
+                    putExtra("name", name)
+                    putExtra("age", age)
+                    putExtra("phone", phone)
                 })
                 finish() // 액티비티 종료
                 true // 이벤트 처리 완료
