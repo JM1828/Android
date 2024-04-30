@@ -48,20 +48,18 @@ class SignUpActivity : AppCompatActivity() {
 
         if (!validateInputs(email, password, nickName)) return
 
-        lifecycleScope.launch {
-            if (memberDao.findMemberByEmail(email) != null) {
-                showToast("이미 가입된 계정입니다.")
-            } else {
-                val newMember = MemberEntity(null, email, password, nickName)
-                memberDao.insertMember(newMember)
+        if (memberDao.findMemberByEmail(email) != null) {
+            showToast("이미 가입된 계정입니다.")
+        } else {
+            val newMember = MemberEntity(null, email, password, nickName)
+            memberDao.insertMember(newMember)
 
-                showToast("회원가입이 완료되었습니다.")
-                navigateToLogin()
-            }
+            showToast("회원가입이 완료되었습니다.")
+            navigateToLogin()
         }
     }
 
-    private suspend fun validateInputs(email: String, password: String, nickName: String): Boolean {
+    private fun validateInputs(email: String, password: String, nickName: String): Boolean {
         when {
             email.isEmpty() || password.isEmpty() || nickName.isEmpty() -> {
                 showToast("모든 정보를 입력해주세요.")
@@ -79,8 +77,8 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun showToast(message: String) {
-        withContext(Dispatchers.Main) {
+    private fun showToast(message: String) {
+        runOnUiThread {
             if (!isFinishing) {
                 Toast.makeText(this@SignUpActivity, message, Toast.LENGTH_SHORT).show()
             }

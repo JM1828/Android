@@ -4,4 +4,6 @@
     <string name="measured_at">측정 시간</string>
 
     <string name="map_button_here">사용자 위치 설정</string>
+
+    <string name="google_login_client_id">962649989443-jl49ammf77vp1fr0g5qq9qc6ua28qjol.apps.googleusercontent.com</string>
 </resources>

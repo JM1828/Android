@@ -2,6 +2,7 @@ package com.example.airandweather
 
 import android.Manifest
 import android.content.Context
+import android.content.Context.LOCATION_SERVICE
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,11 +17,18 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import com.example.airandweather.AirAndWeather.FragmentActivity
 import com.example.airandweather.AirAndWeather.OneFragment
 import com.example.airandweather.Login.LoginActivity
 import com.example.airandweather.databinding.ActivityChosenBinding
 import com.kakao.sdk.user.UserApiClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ChosenActivity : AppCompatActivity() {
     // 프래그먼트 인스턴스 초기화
@@ -29,6 +37,9 @@ class ChosenActivity : AppCompatActivity() {
     lateinit var binding: ActivityChosenBinding
     // 위치 권한 요청 결과를 처리하기 위한 ActivityResultLauncher 초기화
     lateinit var getGPSPermissionLauncher: ActivityResultLauncher<Intent>
+
+    private val scope = CoroutineScope(Job() + Dispatchers.Main)
+
     // 권한 요청 코드
     private val PERMISSIONS_REQUEST_CODE = 100
     // 요청할 권한 목록
@@ -43,20 +54,13 @@ class ChosenActivity : AppCompatActivity() {
         binding = ActivityChosenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        loginUpdateUI() // 엑티비티가 생성될 때 UI 업데이트
+        scope.launch {
+            loginUpdateUI() // Coroutine 안에서 UI 업데이트
+        }
 
-        // 날씨 및 공기질 정보 보기 클릭 이벤트 설정
         binding.weatherView.setOnClickListener {
-            val isLoggedIn = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-                .getBoolean("IsLoggedIn", false)
-
-            if (isLoggedIn) {
-                // 로그인 상태인 경우, FragmentActivity로 이동
-                val intent = Intent(this, FragmentActivity::class.java)
-                startActivity(intent)
-            } else {
-                // 로그인되지 않은 경우, 로그인 필요 메시지 표시
-                Toast.makeText(this, "로그인 후 이용 가능합니다.", Toast.LENGTH_LONG).show()
+            scope.launch {
+                handleWeatherViewClick() // 로그인 상태를 비동기적으로 처리
             }
         }
 
@@ -78,30 +82,56 @@ class ChosenActivity : AppCompatActivity() {
         }
     }
 
-    private fun loginUpdateUI() {
-        val prefs = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-        val isLoggedIn = prefs.getBoolean("IsLoggedIn", false)
-        val nickname = if(isLoggedIn) prefs.getString("LoggedInNickname", "LOGIN") else "LOGIN" // 로그인 상태에 따라 닉네임 추출 또는 기본값 설정
+    private suspend fun loginUpdateUI() {
+        withContext(Dispatchers.Main) { // 메인 스레드에서 UI 업데이트를 보장
+            val prefs = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+            val isLoggedIn = prefs.getBoolean("IsLoggedIn", false)
+            val nickname = if (isLoggedIn) prefs.getString("LoggedInNickname", "LOGIN") else "LOGIN"
 
-        binding.textLogin.text = nickname // 닉네임으로 표시
+            binding.textLogin.text = nickname
 
-        binding.placeBlock1.setOnClickListener {
-            if (isLoggedIn) {
-                // 로그아웃 로직
-                prefs.edit().apply {
-                    putBoolean("IsLoggedIn", false)
-                    remove("LoggedInNickname") // 닉네임 정보 삭제
-                    apply()
+            binding.placeBlock1.setOnClickListener {
+                if (isLoggedIn) {
+                    // 로그아웃 로직
+                    prefs.edit().apply {
+                        putBoolean("IsLoggedIn", false)
+                        remove("LoggedInNickname") // 닉네임 정보 삭제
+                        apply()
+                    }
+                    Toast.makeText(this@ChosenActivity, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
+
+                    // CoroutineScope 사용하여 loginUpdateUI() 호출
+                    CoroutineScope(Dispatchers.Main).launch {
+                        loginUpdateUI() // 로그아웃 후 UI 업데이트 다시 호출
+                    }
+                } else {
+                    // 로그인 페이지로 이동
+                    val intent = Intent(this@ChosenActivity, LoginActivity::class.java)
+                    startActivity(intent)
                 }
-                Toast.makeText(this, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
-                loginUpdateUI() // 로그아웃 후 UI 업데이트
-            } else {
-                // 로그인 페이지로 이동
-                val intent = Intent(this, LoginActivity::class.java)
-                startActivity(intent)
             }
         }
     }
+
+    private suspend fun handleWeatherViewClick() {
+        withContext(Dispatchers.Main) {
+            val isLoggedIn = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+                .getBoolean("IsLoggedIn", false)
+
+            if (isLoggedIn) {
+                val intent = Intent(this@ChosenActivity, FragmentActivity::class.java)
+                startActivity(intent)
+            } else {
+                Toast.makeText(this@ChosenActivity, "로그인 후 이용 가능합니다.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel() // Coroutine 작업을 취소하여 리소스 방출
+    }
+
 
     // 모든 권한 체크 메소드
     private fun checkAllPermissions() {

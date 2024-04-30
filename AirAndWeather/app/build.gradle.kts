@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    id ("kotlin-kapt")
+    id("kotlin-kapt")
 }
 
 android {
@@ -63,12 +63,18 @@ dependencies {
 
     implementation("androidx.fragment:fragment-ktx:1.3.0")
 
+    // 안드로이드를 위한 코루틴
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0")
+
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
-    implementation ("androidx.room:room-ktx:2.4.3")
+    implementation("androidx.room:room-ktx:2.4.3")
 
     kapt("androidx.room:room-compiler:$room_version")
 
     // 소셜 로그인 카카오톡
     implementation("com.kakao.sdk:v2-user:2.20.1")
+
+    // 소셜 로그인 구글
+    implementation("com.google.android.gms:play-services-auth:21.1.0")
 }
