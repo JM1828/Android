@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
+        android:name=".MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -17,6 +18,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AirAndWeather"
         tools:targetApi="31">
+        <!-- 카카오 로그인, 인가코드를 받기 위한 액티비티 -->
+        <activity android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="oauth"
+                    android:scheme="kakaod16087d80c91cf7da093934da501b028" />
+            </intent-filter>
+
+        </activity>
         <activity
             android:name=".ChosenActivity"
             android:exported="true">
@@ -46,11 +60,14 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDHHREmWj526xBYkWxgp3nNJ9XkPFcsNzg" />
 
+        <meta-data
+            android:name="com.kakao.sdk.AppKey"
+            android:value="kakaod16087d80c91cf7da093934da501b028" />
+
         <activity
             android:name=".MainActivity"
             android:exported="false">
         </activity>
-
     </application>
 
 </manifest>

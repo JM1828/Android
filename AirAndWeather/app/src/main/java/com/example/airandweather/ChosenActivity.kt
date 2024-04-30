@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +20,7 @@ import com.example.airandweather.AirAndWeather.FragmentActivity
 import com.example.airandweather.AirAndWeather.OneFragment
 import com.example.airandweather.Login.LoginActivity
 import com.example.airandweather.databinding.ActivityChosenBinding
+import com.kakao.sdk.user.UserApiClient
 
 class ChosenActivity : AppCompatActivity() {
     // 프래그먼트 인스턴스 초기화
@@ -76,24 +78,28 @@ class ChosenActivity : AppCompatActivity() {
         }
     }
 
-    // 로그인 상태 변경 UI 업데이트
     private fun loginUpdateUI() {
-        val isLoggedIn = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-            .getBoolean("IsLoggedIn", false)
+        val prefs = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        val isLoggedIn = prefs.getBoolean("IsLoggedIn", false)
+        val nickname = if(isLoggedIn) prefs.getString("LoggedInNickname", "LOGIN") else "LOGIN" // 로그인 상태에 따라 닉네임 추출 또는 기본값 설정
 
-        binding.textLogin.text = if (isLoggedIn) "LOGOUT" else "LOGIN"
+        binding.textLogin.text = nickname // 닉네임으로 표시
+
         binding.placeBlock1.setOnClickListener {
-            val prefs = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE).edit()
             if (isLoggedIn) {
                 // 로그아웃 로직
-                prefs.putBoolean("IsLoggedIn", false).apply()
+                prefs.edit().apply {
+                    putBoolean("IsLoggedIn", false)
+                    remove("LoggedInNickname") // 닉네임 정보 삭제
+                    apply()
+                }
                 Toast.makeText(this, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
+                loginUpdateUI() // 로그아웃 후 UI 업데이트
             } else {
                 // 로그인 페이지로 이동
                 val intent = Intent(this, LoginActivity::class.java)
                 startActivity(intent)
             }
-            loginUpdateUI() // 로그인 상태 변경 후 UI 업데이트
         }
     }
 

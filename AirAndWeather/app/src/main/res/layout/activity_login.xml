@@ -5,13 +5,15 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Login.LoginActivity">
+    tools:context=".Login.LoginActivity"
+    android:background="@color/white">
 
+    <!--입력란-->
     <LinearLayout
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/loginButton"
+        app:layout_constraintBottom_toTopOf="@+id/buttonLogin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -19,49 +21,115 @@
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:layout_height="250dp"
             android:layout_gravity="center"
-            android:layout_marginBottom="50dp"
-            android:src="@drawable/todo" />
-
-        <EditText
-            android:id="@+id/editTextEmail"
+            android:src="@drawable/main_todo" />
+        <!--이메일 입력-->
+        <LinearLayout
+            android:id="@+id/email_place"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:hint="email"
-            android:inputType="textEmailAddress"/>
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            tools:ignore="MissingConstraints,UselessParent">
 
-        <EditText
-            android:id="@+id/editTextPassword"
+            <TextView
+                android:id="@+id/email"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:text="Email"
+                android:textSize="18dp"
+                android:textColor="#404040"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="@drawable/button_login"/>
+
+            <EditText
+                android:id="@+id/editTextEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:inputType="textEmailAddress"/>
+        </LinearLayout><!--이메일 입력-->
+
+        <!--비밀번호 입력-->
+        <LinearLayout
+            android:id="@+id/password_place"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            android:hint="password"
-            android:inputType="textPassword" />
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            tools:ignore="MissingConstraints,UselessParent">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/password"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:text="Password"
+                android:textSize="18dp"
+                android:textColor="#404040"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:background="@drawable/button_login"/>
+            <EditText
+                android:id="@+id/editTextPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:inputType="textEmailAddress"/>
 
-    <Button
-        android:id="@+id/loginButton"
+        </LinearLayout><!--비밀번호 입력-->
+    </LinearLayout><!--입력란-->
+
+    <!--로그인 버튼-->
+    <LinearLayout
+        android:id="@+id/buttonLogin"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:backgroundTint="@color/text_light_grey"
-        android:text="LOGIN"
-        app:layout_constraintBottom_toTopOf="@+id/buttonSignUp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/buttonSignUp"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/text_light_grey"
+        android:orientation="vertical"
         android:layout_marginBottom="80dp"
-        android:text="Sign up"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <!-- 자체 로그인 / 회원가입-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="10dp">
+
+            <android.widget.Button
+                android:id="@+id/loginButton"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_signup"
+                android:textColor="#ffffff"
+                android:textSize="20dp"
+                android:text="LOGIN" />
+
+            <android.widget.Button
+                android:id="@+id/buttonSignUp"
+                android:layout_width="140dp"
+                android:layout_marginStart="10dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_login2"
+                android:textColor="#ffffff"
+                android:textSize="20dp"
+                android:text="Sign up" />
+        </LinearLayout>
+
+        <!--소셜 로그인-->
+        <android.widget.Button
+            android:layout_marginTop="10dp"
+            android:id="@+id/buttonKakaoLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:background="@drawable/button_kakao"
+            android:textSize="20dp"
+            android:text="kakao Login" />
+
+    </LinearLayout><!--로그인 버튼-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

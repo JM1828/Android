@@ -45,15 +45,14 @@ class SignUpActivity : AppCompatActivity() {
         val email = binding.profileEmail.text.toString()
         val password = binding.profilePassword.text.toString()
         val nickName = binding.profileNickname.text.toString()
-        val placeStation = binding.profileStationt.text.toString()
 
-        if (!validateInputs(email, password, nickName, placeStation)) return
+        if (!validateInputs(email, password, nickName)) return
 
         lifecycleScope.launch {
             if (memberDao.findMemberByEmail(email) != null) {
                 showToast("이미 가입된 계정입니다.")
             } else {
-                val newMember = MemberEntity(null, email, password, nickName, placeStation)
+                val newMember = MemberEntity(null, email, password, nickName)
                 memberDao.insertMember(newMember)
 
                 showToast("회원가입이 완료되었습니다.")
@@ -62,9 +61,9 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun validateInputs(email: String, password: String, nickName: String, placeStation: String): Boolean {
+    private suspend fun validateInputs(email: String, password: String, nickName: String): Boolean {
         when {
-            email.isEmpty() || password.isEmpty() || nickName.isEmpty() || placeStation.isEmpty() -> {
+            email.isEmpty() || password.isEmpty() || nickName.isEmpty() -> {
                 showToast("모든 정보를 입력해주세요.")
                 return false
             }

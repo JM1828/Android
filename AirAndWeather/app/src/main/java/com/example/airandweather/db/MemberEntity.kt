@@ -22,13 +22,6 @@ data class MemberEntity(
     @ColumnInfo(name = "nick_name")
     var nickName: String,
 
-//    @ColumnInfo(name = "address")
-//    var address: String,
-
-    // 회원이 설정한 지하철역 정보
-    @ColumnInfo(name = "place_station")
-    var placeStation: String,
-
 //    @ColumnInfo(name = "image")
 //    var image: String?,
 //

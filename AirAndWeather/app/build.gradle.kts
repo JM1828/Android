@@ -68,4 +68,7 @@ dependencies {
     implementation ("androidx.room:room-ktx:2.4.3")
 
     kapt("androidx.room:room-compiler:$room_version")
+
+    // 소셜 로그인 카카오톡
+    implementation("com.kakao.sdk:v2-user:2.20.1")
 }
