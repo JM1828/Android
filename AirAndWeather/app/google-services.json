@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "962649989443",
+    "project_id": "alert-sol-418003",
+    "storage_bucket": "alert-sol-418003.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:962649989443:android:82c90b01498f59b5808ff6",
+        "android_client_info": {
+          "package_name": "com.example.airandweather"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "962649989443-oktbjbsk95k8o0457e4uftd148pucv6g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.airandweather",
+            "certificate_hash": "7991352fbf091c5cbbf06bb9d100bee237a16510"
+          }
+        },
+        {
+          "client_id": "962649989443-9hhcm6csd5sjlnirth343bt2rvhe50ap.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMmlScHWERPaCVTdwwoCCi6Uqi5sN9ZCw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "962649989443-9hhcm6csd5sjlnirth343bt2rvhe50ap.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

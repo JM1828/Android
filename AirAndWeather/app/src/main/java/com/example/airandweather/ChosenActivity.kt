@@ -18,10 +18,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
+import com.bumptech.glide.Glide
 import com.example.airandweather.AirAndWeather.FragmentActivity
 import com.example.airandweather.AirAndWeather.OneFragment
 import com.example.airandweather.Login.LoginActivity
 import com.example.airandweather.databinding.ActivityChosenBinding
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
 import com.kakao.sdk.user.UserApiClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +43,9 @@ class ChosenActivity : AppCompatActivity() {
     // 위치 권한 요청 결과를 처리하기 위한 ActivityResultLauncher 초기화
     lateinit var getGPSPermissionLauncher: ActivityResultLauncher<Intent>
 
+    private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var mAuth: FirebaseAuth
+
     private val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     // 권한 요청 코드
@@ -53,6 +61,16 @@ class ChosenActivity : AppCompatActivity() {
         // 뷰 바인딩 설정
         binding = ActivityChosenBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 기존 LoginActivity에서 하셨던 것처럼 초기화
+        mAuth = FirebaseAuth.getInstance()
+
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.google_login_client_id))
+            .requestEmail()
+            .build()
+
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
 
         scope.launch {
             loginUpdateUI() // Coroutine 안에서 UI 업데이트
@@ -83,29 +101,37 @@ class ChosenActivity : AppCompatActivity() {
     }
 
     private suspend fun loginUpdateUI() {
-        withContext(Dispatchers.Main) { // 메인 스레드에서 UI 업데이트를 보장
+        withContext(Dispatchers.Main) {
             val prefs = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
             val isLoggedIn = prefs.getBoolean("IsLoggedIn", false)
-            val nickname = if (isLoggedIn) prefs.getString("LoggedInNickname", "LOGIN") else "LOGIN"
+            val nickname = if (isLoggedIn) prefs.getString("Nickname", "LOGIN") else "LOGIN"
+            val profileImageUrl = prefs.getString("ProfileImageUrl", "")
 
             binding.textLogin.text = nickname
+
+            if (profileImageUrl!!.isNotEmpty()) {
+                // Glide를 사용하여 프로필 이미지 보여주기
+                Glide.with(this@ChosenActivity).load(profileImageUrl).override(150, 150).into(binding.profileImage)
+            }
 
             binding.placeBlock1.setOnClickListener {
                 if (isLoggedIn) {
                     // 로그아웃 로직
                     prefs.edit().apply {
                         putBoolean("IsLoggedIn", false)
-                        remove("LoggedInNickname") // 닉네임 정보 삭제
+                        remove("LoginType")
+                        remove("Nickname")
+                        remove("ProfileImageUrl")
                         apply()
+                        signOut()
                     }
+
                     Toast.makeText(this@ChosenActivity, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
 
-                    // CoroutineScope 사용하여 loginUpdateUI() 호출
                     CoroutineScope(Dispatchers.Main).launch {
-                        loginUpdateUI() // 로그아웃 후 UI 업데이트 다시 호출
+                        loginUpdateUI()
                     }
                 } else {
-                    // 로그인 페이지로 이동
                     val intent = Intent(this@ChosenActivity, LoginActivity::class.java)
                     startActivity(intent)
                 }
@@ -132,6 +158,21 @@ class ChosenActivity : AppCompatActivity() {
         scope.cancel() // Coroutine 작업을 취소하여 리소스 방출
     }
 
+    private fun signOut() {
+        val googleSignInClient: GoogleSignInClient
+        // GoogleSignInOptions 및 GoogleSignInClient 인스턴스 초기화
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .build()
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+
+        // Google 로그아웃
+        googleSignInClient.signOut().addOnCompleteListener(this) {
+            // Firebase에서 로그아웃
+            FirebaseAuth.getInstance().signOut()
+            Toast.makeText(this, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     // 모든 권한 체크 메소드
     private fun checkAllPermissions() {

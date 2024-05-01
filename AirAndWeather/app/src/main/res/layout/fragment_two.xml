@@ -45,7 +45,7 @@
         android:layout_width="53dp"
         android:layout_height="53dp"
         android:layout_marginEnd="10dp"
-        android:src="@drawable/icon_air"
+        android:src="@drawable/icon_home"
         app:layout_constraintBottom_toBottomOf="@+id/rectangle_9"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/rectangle_9" />

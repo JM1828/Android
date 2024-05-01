@@ -133,7 +133,7 @@
                 android:layout_weight="1" />
 
             <android.widget.Button
-                android:id="@+id/buttonKakaoLogin"
+                android:id="@+id/buttonGoogleLogin"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/google" />
@@ -144,7 +144,7 @@
                 android:layout_weight="1" />
 
             <android.widget.Button
-                android:id="@+id/buttonGoogleLogin"
+                android:id="@+id/buttonKakaoLogin"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/kakao" />
