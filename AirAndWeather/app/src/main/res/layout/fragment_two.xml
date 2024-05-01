@@ -36,12 +36,12 @@
         android:textStyle="bold"
         android:textSize="36sp"
         app:layout_constraintBottom_toBottomOf="@+id/rectangle_9"
-        app:layout_constraintEnd_toStartOf="@id/Air_icon"
+        app:layout_constraintEnd_toStartOf="@id/homeIcon"
         app:layout_constraintStart_toEndOf="@id/menu_icon"
         app:layout_constraintTop_toTopOf="@id/rectangle_9" />
 
     <ImageView
-        android:id="@+id/Air_icon"
+        android:id="@+id/homeIcon"
         android:layout_width="53dp"
         android:layout_height="53dp"
         android:layout_marginEnd="10dp"

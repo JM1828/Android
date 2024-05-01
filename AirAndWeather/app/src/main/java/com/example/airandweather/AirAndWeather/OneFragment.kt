@@ -4,15 +4,18 @@ import android.app.Activity
 import android.content.Intent
 import android.location.Address
 import android.location.Geocoder
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.airandweather.ChosenActivity
 import com.example.airandweather.R
 import com.example.airandweather.databinding.FragmentOneBinding
 import com.example.airandweather.databinding.FragmentTwoBinding
@@ -43,6 +46,7 @@ class OneFragment : Fragment() {
         }
 
     // onCreateView 메서드: 프래그먼트의 뷰를 생성하고 초기화
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -91,6 +95,11 @@ class OneFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setRefreshButton()
         setFab()
+
+        airBinding.homeIcon.setOnClickListener {
+            val intent = Intent(context, ChosenActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     // UI 업데이트 메소드
@@ -133,6 +142,7 @@ class OneFragment : Fragment() {
     }
 
     // 공기질 데이터를 UI에 업데이트하는 함수
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun updateAirUI(airQualityData: AirQualityResponse) {
         val pollutionData = airQualityData.data.current.pollution
         // AQI(공기질 지수)를 표시
@@ -168,6 +178,7 @@ class OneFragment : Fragment() {
     }
 
     // 날씨 데이터를 UI에 업데이트하는 함수
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun updateWeatherUI(weatherData: AirQualityResponse.Data.Current.Weather) {
         // 측정 시간을 'Asia/Seoul' 시간대로 변환하여 표시합니다.
         val zonedDateTime =

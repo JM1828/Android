@@ -85,7 +85,7 @@
     <!--로그인 버튼-->
     <LinearLayout
         android:id="@+id/buttonLogin"
-        android:layout_width="match_parent"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="80dp"
         android:orientation="vertical"
@@ -93,17 +93,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
         <!-- 자체 로그인 / 회원가입-->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center"
-            android:orientation="horizontal">
 
             <android.widget.Button
                 android:id="@+id/loginButton"
-                android:layout_width="140dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/button_signup"
                 android:text="LOGIN"
                 android:textColor="#ffffff"
@@ -111,14 +106,12 @@
 
             <android.widget.Button
                 android:id="@+id/buttonSignUp"
-                android:layout_width="140dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
                 android:background="@drawable/button_login2"
                 android:text="Sign up"
                 android:textColor="#ffffff"
                 android:textSize="20dp" />
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

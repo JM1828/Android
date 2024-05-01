@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "962649989443-oktbjbsk95k8o0457e4uftd148pucv6g.apps.googleusercontent.com",
+          "client_id": "962649989443-4qkqo67g3dgi37sugu1kie8icn7e74h9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.airandweather",
+            "certificate_hash": "a3aefe3729beee6a955c9ceee8f251e642540df7"
+          }
+        },
+        {
+          "client_id": "962649989443-n9c2buejq4qkq3rqudte62494hpikok4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.airandweather",
@@ -28,7 +36,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDMmlScHWERPaCVTdwwoCCi6Uqi5sN9ZCw"
+          "current_key": "AIzaSyC_CUl36edoRjzzGKcOb4ZTGWrp6TdVZl8"
         }
       ],
       "services": {

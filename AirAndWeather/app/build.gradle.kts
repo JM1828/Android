@@ -73,7 +73,11 @@ dependencies {
 
     kapt("androidx.room:room-compiler:$roomVersion")
 
-    // 소셜 로그인 카카오톡
+    // Glide 이미지
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    kapt("com.github.bumptech.glide:compiler:4.12.0")
+
+    // 소셜 로그인 카카오
     implementation("com.kakao.sdk:v2-user:2.20.1")
 
     // 소셜 로그인 구글
@@ -83,7 +87,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
     implementation("com.google.android.gms:play-services-auth:21.1.0")
 
-    // Glide
-    implementation("com.github.bumptech.glide:glide:4.12.0")
-    kapt("com.github.bumptech.glide:compiler:4.12.0")
+    // 소셜 로그인 네이버
+    implementation("com.navercorp.nid:oauth:5.9.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
 }

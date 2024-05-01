@@ -30,8 +30,8 @@ class LocationViewModel : ViewModel() {
     val weatherQualityData: LiveData<AirQualityResponse.Data.Current.Weather> get() = _weatherQualityData
 
     // 위도와 경도
-    var latitude: Double? = 0.0
-    var longitude: Double? = 0.0
+    var latitude: Double? = null
+    var longitude: Double? = null
 
     // 공기질 데이터 업데이트
     fun updateAirQuality(airQualityResponse: AirQualityResponse) {
@@ -49,24 +49,26 @@ class LocationViewModel : ViewModel() {
         getCurrentAddress: (Double, Double) -> Address?, // 위도와 경도를 통해 주소 정보를 가져오는 함수
     ) {
         // 현재 위치의 위도와 경도를 초기화
-        if (latitude == 0.0 && longitude == 0.0) {
+        if (latitude == null || longitude == null) {
             latitude = locationProvider.getLocationLatitude()
             longitude = locationProvider.getLocationLongitude()
         }
 
-        // 위도와 경도를 바탕으로 주소 정보를 가져와 UI 업데이트
-        if (latitude != 0.0 && longitude != 0.0) {
+        // 위도와 경도가 null이 아니며, 0.0도 아닌 경우
+        if (latitude != null && longitude != null && latitude != 0.0 && longitude != 0.0) {
             val address = getCurrentAddress(latitude!!, longitude!!)
             address?.let {
                 // 주소 정보를 바탕으로 텍스트 데이터 지정
                 val defaultText = "알 수 없는 도로"
-                val addressText = address.thoroughfare ?: address.featureName ?: address.subLocality
-                ?: address.locality ?: defaultText
+                val addressText = it.thoroughfare ?: it.featureName ?: it.subLocality ?: it.locality ?: defaultText
                 addressTextLiveData.value = addressText
 
                 // 부가적인 위치 정보를 UI에 업데이트
-                val locationSubtitle = "${address.countryName} ${address.adminArea}"
+                val locationSubtitle = "${it.countryName} ${it.adminArea}"
                 locationSubtitleLiveData.value = locationSubtitle
+            } ?: run {
+                // 주소 정보를 찾을 수 없는 경우의 처리
+                addressTextLiveData.value = "위치 정보를 가져올 수 없습니다."
             }
 
             // 공기 질 데이터를 가져와서 UI 업데이트

@@ -6,4 +6,8 @@
     <string name="map_button_here">사용자 위치 설정</string>
 
     <string name="google_login_client_id">962649989443-9hhcm6csd5sjlnirth343bt2rvhe50ap.apps.googleusercontent.com</string>
+
+    <string name="social_login_info_naver_client_id">uiQucVW4O9r9bhg80XvD</string>
+    <string name="social_login_info_naver_client_secret">FyxVPv_DH_</string>
+    <string name="social_login_info_naver_client_name">네이버아이디 로그인</string>
 </resources>

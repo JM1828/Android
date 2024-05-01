@@ -9,9 +9,7 @@ import com.example.airandweather.databinding.ActivitySignupBinding
 import com.example.airandweather.db.AppDatabase
 import com.example.airandweather.db.MemberDao
 import com.example.airandweather.db.MemberEntity
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class SignUpActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySignupBinding
@@ -34,13 +32,16 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
+    // 비밀번호가 유효한지 확인, 유효한 비밀번호는 길이가 6자 이상
     private fun isValidPassword(password: String): Boolean = password.length >= 6
 
+    // 이메일 유효성 검사를 위해 정규 표현식을 사용
     private fun isValidEmail(email: String): Boolean {
         val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
         return email.matches(emailRegex.toRegex())
     }
 
+    // 회원가입 로직을 처리하는 함수
     private suspend fun signUp() {
         val email = binding.profileEmail.text.toString()
         val password = binding.profilePassword.text.toString()
@@ -59,6 +60,7 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
+    // 이메일, 비밀번호, 닉네임 입력값의 유효성을 검사
     private fun validateInputs(email: String, password: String, nickName: String): Boolean {
         when {
             email.isEmpty() || password.isEmpty() || nickName.isEmpty() -> {
@@ -77,6 +79,7 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
+    // Toast 메시지를 사용하여 사용자에게 짧은 메시지를 표시
     private fun showToast(message: String) {
         runOnUiThread {
             if (!isFinishing) {
@@ -85,6 +88,7 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
+    // 회원가입이 성공적으로 완료된 후 로그인 화면으로 이동
     private fun navigateToLogin() {
         val intent = Intent(this@SignUpActivity, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
