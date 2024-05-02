@@ -7,6 +7,7 @@ import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -20,6 +21,7 @@ import com.example.airandweather.R
 import com.example.airandweather.databinding.FragmentOneBinding
 import com.example.airandweather.databinding.FragmentTwoBinding
 import com.example.airandweather.AirAndWeather.retrofit.AirQualityResponse
+import com.example.airandweather.util.drawerUtil.DrawerUtil
 import java.io.IOException
 import java.lang.IllegalArgumentException
 import java.time.ZoneId
@@ -32,6 +34,7 @@ class TwoFragment : Fragment() {
     private lateinit var viewModel: LocationViewModel
     private lateinit var airBinding: FragmentOneBinding
     private lateinit var weatherBinding: FragmentTwoBinding
+    private var isDrawerOpen = false
 
     // 맵 액티비티 결과를 처리하는 콜백 등록
     private val startMapActivityResult =
@@ -98,6 +101,22 @@ class TwoFragment : Fragment() {
         weatherBinding.homeIcon.setOnClickListener {
             val intent = Intent(context, MainActivity::class.java)
             startActivity(intent)
+        }
+
+        // 메뉴 아이콘 클릭 시 네비게이션 드로어의 가시성을 토글
+        weatherBinding.menuIcon.setOnClickListener {
+            isDrawerOpen = DrawerUtil.toggleDrawer(weatherBinding.navigationDrawer, isDrawerOpen)
+        }
+
+        // 메인 레이아웃에 터치 리스너를 설정
+        // 경고를 무시: 이 경우 performClick을 호출하지 않는 것이 의도된 동작
+        weatherBinding.root.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN && isDrawerOpen) {
+                if (!DrawerUtil.isPointInsideView(event.rawX, event.rawY, weatherBinding.navigationDrawer)) {
+                    isDrawerOpen = DrawerUtil.closeDrawer(weatherBinding.navigationDrawer, isDrawerOpen)
+                }
+            }
+            false
         }
     }
 

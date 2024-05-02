@@ -126,7 +126,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     // 날씨 보기 클릭 이벤트 처리
     private suspend fun handleWeatherViewClick() {
         withContext(Dispatchers.Main) {
@@ -138,7 +137,7 @@ class MainActivity : AppCompatActivity() {
 
             // 기존 로그인 상태 확인 조건에 더하여 로그인 타입이 구글, 카카오, 네이버 중 하나라도 해당되는지 확인
             val isAuthorizedUser =
-                isLoggedIn && (loginType == "Google" || loginType == "Kakao" || loginType == "Naver")
+                isLoggedIn && (loginType == "Google" || loginType == "Kakao" || loginType == "Naver" || loginType == "General")
 
             if (isAuthorizedUser) {
                 // 로그인되어 있고, 구글/카카오/네이버 중 하나로 로그인되어 있을 경우 FragmentActivity로 이동

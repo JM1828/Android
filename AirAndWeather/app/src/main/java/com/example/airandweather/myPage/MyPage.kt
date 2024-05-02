@@ -4,23 +4,16 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.graphics.Rect
-import android.net.Uri
 import android.os.Bundle
-import android.text.SpannableString
-import android.text.style.UnderlineSpan
-import android.util.Log
 import android.view.MotionEvent
-import android.view.View
 import android.widget.FrameLayout
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.airandweather.AirAndWeather.FragmentActivity
 import com.example.airandweather.MainActivity
 import com.example.airandweather.R
 import com.example.airandweather.databinding.ActivityMypageBinding
 import com.example.airandweather.db.AppDatabase
 import com.example.airandweather.db.MemberDao
+import com.example.airandweather.util.drawerUtil.DrawerUtil
 
 
 // 액티비티의 메인 클래스를 정의합니다.
@@ -30,8 +23,6 @@ class MyPage : AppCompatActivity() {
     private lateinit var binding: ActivityMypageBinding
     lateinit var db: AppDatabase
     lateinit var memberDao: MemberDao
-
-    private lateinit var drawerLayout: FrameLayout
     private var isDrawerOpen = false
 
     @SuppressLint("ClickableViewAccessibility")
@@ -40,6 +31,17 @@ class MyPage : AppCompatActivity() {
         // XML 레이아웃을 View와 바인딩합니다.
         binding = ActivityMypageBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // SharedPreferences에서 사용자 정보 가져오기
+        val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        val userNickName = sharedPreferences.getString("Nickname", "")
+        val userEmail = sharedPreferences.getString("Email", "")
+        val userPassword = sharedPreferences.getString("Password", "")
+
+        // TextView에 사용자 정보 표시
+        binding.savedEmail.text = userEmail
+        binding.savedPassword.text = userPassword
+        binding.savedNickname.text = userNickName
 
         // 이미지 뷰의 윤곽을 클립합니다.
         binding.imageView.clipToOutline = true
@@ -60,65 +62,42 @@ class MyPage : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // SharedPreferences에서 사용자 정보 가져오기
-        val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-        val userNickName = sharedPreferences.getString("Nickname", "")
-        val userEmail = sharedPreferences.getString("Email", "")
-        val userPassword = sharedPreferences.getString("Password", "")
-        val base64ImageString = sharedPreferences.getString("ProfileImageUrl", null)
-
-        // 프로필 이미지를 Base64 문자열에서 비트맵으로 디코딩하여 설정
-        base64ImageString?.let {
-            val imageBytes = android.util.Base64.decode(it, android.util.Base64.DEFAULT)
-            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-            binding.editImage.setImageBitmap(bitmap)
+        // 메뉴 아이콘 클릭 시 네비게이션 드로어의 가시성을 토글
+        binding.menuIcon.setOnClickListener {
+            isDrawerOpen = DrawerUtil.toggleDrawer(binding.navigationDrawer, isDrawerOpen)
         }
 
-        // TextView에 사용자 정보 표시
-        binding.savedEmail.text = userEmail
-        binding.savedPassword.text = userPassword
-        binding.savedNickname.text = userNickName
-
-        // 네비게이션 드로어 토글 준비
-        drawerLayout = findViewById(R.id.navigation_drawer)
-        val showNavigationButton = findViewById<View>(R.id.menu_icon)
-        showNavigationButton.setOnClickListener {
-            toggleDrawer() // 네비게이션 드로어의 가시성을 토글합니다.
-        }
-
-        // 메인 레이아웃 터치 리스너 설정
-        val mainLayout: View = findViewById(android.R.id.content)
-        mainLayout.setOnTouchListener { _, event ->
+        // 메인 레이아웃에 터치 리스너를 설정
+        binding.root.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN && isDrawerOpen) {
-                if (!isPointInsideView(event.rawX, event.rawY, drawerLayout)) {
-                    closeDrawer() // 드로어 밖의 영역이 터치되면 드로어를 닫습니다.
+                if (!DrawerUtil.isPointInsideView(event.rawX, event.rawY, binding.navigationDrawer)) {
+                    isDrawerOpen = DrawerUtil.closeDrawer(binding.navigationDrawer, isDrawerOpen)
                 }
             }
             false
         }
     }
 
-    // 네비게이션 드로어의 가시성을 토글하는 함수
-    private fun toggleDrawer() {
-        if(isDrawerOpen) {
-            drawerLayout.visibility = View.GONE
+    // Activity가 다시 시작될 때마다 호출되는 onResume() 메소드 오버라이드
+    override fun onResume() {
+        super.onResume()
+        loadUserProfileImage()
+    }
+
+    // 사용자 프로필 이미지를 로드하는 메소드
+    private fun loadUserProfileImage() {
+        val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        val imagePath = sharedPreferences.getString("UserImageFilePath", null)
+
+        if (imagePath != null) {
+            // 저장된 이미지 경로에서 비트맵을 디코딩
+            val bitmap = BitmapFactory.decodeFile(imagePath)
+            // 디코딩된 비트맵을 ImageView에 설정하여 사용자 프로필 이미지로 표시
+            binding.editImage.setImageBitmap(bitmap)
         } else {
-            drawerLayout.visibility = View.VISIBLE
+            // 기본 이미지 설정
+            binding.editImage.setImageResource(R.drawable.profileee)
         }
-        isDrawerOpen = !isDrawerOpen
-    }
-
-    // 특정 View 내부의 점을 확인하는 함수
-    private fun isPointInsideView(x: Float, y: Float, view: View): Boolean {
-        val location = IntArray(2)
-        view.getLocationOnScreen(location)
-        val rect = Rect(location[0], location[1], location[0] + view.width, location[1] + view.height)
-        return rect.contains(x.toInt(), y.toInt())
-    }
-
-    private fun closeDrawer() {
-        drawerLayout.visibility = View.GONE
-        isDrawerOpen = false
     }
 }
 

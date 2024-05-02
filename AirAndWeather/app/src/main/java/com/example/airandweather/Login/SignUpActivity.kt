@@ -19,6 +19,10 @@ import com.example.airandweather.db.AppDatabase
 import com.example.airandweather.db.Converters
 import com.example.airandweather.db.MemberDao
 import com.example.airandweather.db.MemberEntity
+import com.example.airandweather.util.signUpUtils.SignUpUtils
+import com.example.airandweather.util.signUpUtils.SignUpUtils.convertUriToByteArray
+import com.example.airandweather.util.signUpUtils.SignUpUtils.saveImageAndPathInPreferences
+import com.example.airandweather.util.signUpUtils.SignUpUtils.validateInputs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,6 +38,9 @@ class SignUpActivity : AppCompatActivity() {
     lateinit var db: AppDatabase
     lateinit var memberDao: MemberDao
     private var imageUri: Uri? = null
+
+    // SignUpUtils 인스턴스 생성
+    private val signUpUtils = SignUpUtils
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,11 +64,9 @@ class SignUpActivity : AppCompatActivity() {
             }
         }
 
-        // 이미지 선택 및 회원가입 버튼에 대한 클릭 리스너 설정
+        // 프로필 이미지 선택 이벤트 설정
         binding.btnImageView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            activityResult.launch(intent)
+            activityResult.launch("image/*")
         }
     }
 
@@ -73,26 +78,35 @@ class SignUpActivity : AppCompatActivity() {
         val nickName = binding.profileNickname.text.toString()
 
         // 입력 유효성 검사 실패 시 함수 종료
-        if (!validateInputs(email, password, nickName)) return
+        if (!validateInputs(this, email, password, nickName)) return
 
-        // 이미지 처리 및 바이트 배열 가져오기
-        val imageByteArray: ByteArray = processImageForSignUp() ?: return
-        // 이미지 바이트 배열 로깅
-        Log.d("imageByteArray", "$imageByteArray")
+        // 이미지 처리 및 바이트 배열 가져오기 (SignUpUtils 클래스 사용)
+        val imageByteArray: ByteArray = imageUri?.let {
+            signUpUtils.convertUriToByteArray(this, it)
+        } ?: signUpUtils.getDefaultImageByteArray(this) // 기본 이미지 사용
 
-        // 회원정보 등록
-        registerNewMember(email, password, nickName, imageByteArray)
+        lifecycleScope.launch {
+            // 새로운 회원 정보를 데이터베이스에 등록
+            val existingMember = memberDao.findMemberByEmail(email)
+            if (existingMember == null) {
+                val newMember = MemberEntity(null, email, password, nickName, imageByteArray)
+                memberDao.insertMember(newMember)
+                showToast("회원가입이 완료되었습니다.")
+                saveImageAndPathInPreferences(this@SignUpActivity, imageByteArray, nickName)
+                navigateToLogin()
+            } else {
+                showToast("이미 가입된 계정입니다.")
+            }
+        }
     }
 
     // 갤러리에서 이미지 선택했을 때의 콜백 처리
-    private val activityResult: ActivityResultLauncher<Intent> = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK && result.data != null) {
-            result.data!!.data?.let { uri ->
-                handleImageSelection(uri)
-                imageUri = uri
-            }
+    private val activityResult: ActivityResultLauncher<String> = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            handleImageSelection(uri)
+            imageUri = uri
         } else {
             Log.d("ImageSelection", "이미지 선택 실패: 사용자가 이미지를 선택하지 않았거나 기타 오류가 발생했습니다.")
         }
@@ -101,139 +115,11 @@ class SignUpActivity : AppCompatActivity() {
     // 사용자가 선택한 이미지 처리
     private fun handleImageSelection(uri: Uri) {
         lifecycleScope.launch {
-            val byteData = convertUriToByteArray(uri)
+            val byteData = convertUriToByteArray(this@SignUpActivity, uri)
             val bitmap = BitmapFactory.decodeByteArray(byteData, 0, byteData.size)
             // ImageView 업데이트
             binding.userImageView.setImageBitmap(bitmap)
             Log.d("ImageSelection", "Selected image URI: $uri")
-        }
-    }
-
-    // 특정 URI의 이미지를 비트맵으로 변환
-    private fun uriToBitmap(uri: Uri): Bitmap? {
-        return try {
-            contentResolver.openInputStream(uri).use {
-                BitmapFactory.decodeStream(it)
-            }
-        } catch (e: FileNotFoundException) {
-            Log.e("uriToBitmap", "File not found", e)
-            null
-        }
-    }
-
-    // URI에서 바이트 배열로 변환
-    private suspend fun convertUriToByteArray(uri: Uri): ByteArray = withContext(Dispatchers.IO) {
-        uriToBitmap(uri)?.let { bitmap ->
-            ByteArrayOutputStream().use { stream ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                stream.toByteArray()
-            }
-        } ?: byteArrayOf().apply {
-            Log.e("convertUriToByteArray", "Bitmap conversion failed")
-        }
-    }
-
-    // 기본 이미지를 바이트 배열로 변환
-    private suspend fun getDefaultImageByteArray(): ByteArray = withContext(Dispatchers.IO) {
-        try {
-            val bitmap =
-                BitmapFactory.decodeResource(applicationContext.resources, R.drawable.profileee)
-            ByteArrayOutputStream().use { stream ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                stream.toByteArray()
-            }
-        } catch (e: Exception) {
-            Log.e("getDefaultImage", "Default image loading failed", e)
-            byteArrayOf()
-        }
-    }
-
-    // 회원가입을 위한 이미지 처리
-    private suspend fun processImageForSignUp(): ByteArray? = withContext(Dispatchers.IO) {
-        Log.d("imageConversion", "이미지 변환 작업을 시작합니다.")
-        val converters = Converters()
-        imageUri?.let {
-            Log.d("imageUri", "현재 imageUri = $it")
-            uriToBitmap(it)?.let { bitmap ->
-                val byteArray = converters.fromBitmap(bitmap)
-                Log.d("imageConversion", "이미지 변환 작업이 완료되었습니다.")
-                byteArray
-            } ?: run {
-                Log.d("imageConversion", "비트맵으로의 변환 실패. 빈 바이트 배열을 반환합니다.")
-                byteArrayOf()
-            }
-        } ?: run {
-            Log.d("imageConversion", "imageUri가 null입니다. 기본 이미지로 대체합니다.")
-            getDefaultImageByteArray()
-        }
-    }
-
-    // 새로운 회원 정보를 데이터베이스에 등록
-    private fun registerNewMember(
-        email: String,
-        password: String,
-        nickName: String,
-        imageByteArray: ByteArray
-    ) {
-        lifecycleScope.launch {
-            val existingMember = memberDao.findMemberByEmail(email)
-            if (existingMember == null) {
-                val newMember = MemberEntity(null, email, password, nickName, imageByteArray)
-                memberDao.insertMember(newMember)
-                showToast("회원가입이 완료되었습니다.")
-                saveImageAndPathInPreferences(imageByteArray, nickName)
-                navigateToLogin()
-            } else {
-                showToast("이미 가입된 계정입니다.")
-            }
-        }
-    }
-
-    // 이미지 파일을 저장하고, 파일 경로를 SharedPreferences에 저장
-    private fun saveImageAndPathInPreferences(imageByteArray: ByteArray, nickName: String) {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val fileName = "${nickName}_$timeStamp.jpg"
-
-        // 파일을 내부 저장소에 저장
-        val file = File(this@SignUpActivity.filesDir, fileName)
-        file.writeBytes(imageByteArray)
-
-        // 파일 경로를 SharedPreferences에 저장
-        getSharedPreferences("AppPreferences", Context.MODE_PRIVATE).edit().apply {
-            putString("UserImageFilePath", file.absolutePath)
-            apply()
-        }
-    }
-
-    // ============== 회원가입 유효성 검사 ===============
-    // 비밀번호가 유효한지 확인, 유효한 비밀번호는 길이가 6자 이상
-    private fun isValidPassword(password: String): Boolean = password.length >= 6
-
-    // 이메일 유효성 검사를 위해 정규 표현식을 사용
-    private fun isValidEmail(email: String): Boolean {
-        val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
-        return email.matches(emailRegex.toRegex())
-    }
-
-    // 이메일, 비밀번호, 닉네임 입력값의 유효성을 검사
-    private fun validateInputs(email: String, password: String, nickName: String): Boolean {
-        when {
-            email.isEmpty() || password.isEmpty() || nickName.isEmpty() -> {
-                showToast("모든 정보를 입력해주세요.")
-                return false
-            }
-
-            !isValidEmail(email) -> {
-                showToast("올바른 이메일 주소를 입력해주세요.")
-                return false
-            }
-
-            !isValidPassword(password) -> {
-                showToast("비밀번호는 6자 이상이어야 합니다.")
-                return false
-            }
-
-            else -> return true
         }
     }
 

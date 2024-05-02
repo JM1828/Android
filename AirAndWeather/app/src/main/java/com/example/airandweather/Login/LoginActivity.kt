@@ -75,13 +75,6 @@ class LoginActivity : AppCompatActivity() {
         // 파이어베이스 인증 객체 초기화
         mAuth = FirebaseAuth.getInstance()
 
-        // 로그인 버튼 클릭 이벤트
-        binding.loginButton.setOnClickListener {
-            lifecycleScope.launch {
-                login()
-            }
-        }
-
         // 회원가입 버튼 클릭 이벤트
         binding.buttonSignUp.setOnClickListener {
             val intent = Intent(this, SignUpActivity::class.java)
@@ -92,6 +85,13 @@ class LoginActivity : AppCompatActivity() {
         binding.homeIcon.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
+        }
+
+        // 일반 로그인 버튼 클릭 이벤트
+        binding.loginButton.setOnClickListener {
+            lifecycleScope.launch {
+                login()
+            }
         }
 
         // 카카오 로그인 버튼 클릭 이벤트
@@ -316,7 +316,6 @@ class LoginActivity : AppCompatActivity() {
         val email = binding.editTextEmail.text.toString().trim()
         val password = binding.editTextPassword.text.toString().trim()
 
-
         if (email.isEmpty() || password.isEmpty()) {
             withContext(Dispatchers.Main) {
                 Toast.makeText(this@LoginActivity, "이메일과 비밀번호를 입력해주세요.", Toast.LENGTH_SHORT).show()
@@ -333,12 +332,13 @@ class LoginActivity : AppCompatActivity() {
                 // 로그인 성공 시, 닉네임 SharedPreferences에 저장
                 val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE).edit()
                 val encodedImage = Base64.encodeToString(member.image, Base64.DEFAULT)
+                sharedPreferences.putBoolean("IsLoggedIn", true) // 로그인 상태 저장
                 sharedPreferences.putString("Nickname", member.nickName)
                 sharedPreferences.putString("Email", member.email)
                 sharedPreferences.putString("Password", member.password)
                 sharedPreferences.putString("ProfileImageUrl", encodedImage)
                 sharedPreferences.putString("mno", member.mno.toString())
-                sharedPreferences.putBoolean("IsLoggedIn", true) // 로그인 상태 저장
+                sharedPreferences.putString("LoginType", "General") // 로그인 타입 저장
                 sharedPreferences.apply()
 
                 val intent = Intent(this@LoginActivity, MainActivity::class.java)
