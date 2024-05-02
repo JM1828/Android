@@ -3,8 +3,10 @@ package com.example.airandweather.db
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
 
 @Entity
+@TypeConverters(Converters::class)
 data class MemberEntity(
     // autoGenerate = true는 이 기본 키가 자동으로 생성되도록 지정
     @PrimaryKey(autoGenerate = true)
@@ -22,8 +24,9 @@ data class MemberEntity(
     @ColumnInfo(name = "nick_name")
     var nickName: String,
 
-//    @ColumnInfo(name = "image")
-//    var image: String?,
+    //ByteArray형식으로 이미지 저장
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    var image: ByteArray
 //
 //    @Relation(parentColumn = "mno", entityColumn = "mno")
 //    val todos: List<TodoEntity>? = null,

@@ -1,4 +1,4 @@
-package com.example.airandweather.retrofit
+package com.example.airandweather.AirAndWeather.retrofit
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

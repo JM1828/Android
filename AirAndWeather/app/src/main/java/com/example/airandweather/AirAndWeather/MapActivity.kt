@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.example.airandweather.AirAndWeather.LocationProvider
 import com.example.airandweather.R
 import com.example.airandweather.databinding.ActivityMapBinding
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -36,7 +37,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(binding.root)
 
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, "AIzaSyDHHREmWj526xBYkWxgp3nNJ9XkPFcsNzg")
+            Places.initialize(applicationContext, "AIzaSyABquaUkYhSQ6YX8QkmtCLthI_f5r475so")
         }
 
         currentLat = intent.getDoubleExtra("currentLat", 0.0)

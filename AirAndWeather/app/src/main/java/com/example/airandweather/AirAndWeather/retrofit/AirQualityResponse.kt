@@ -1,4 +1,4 @@
-package com.example.airandweather.retrofit
+package com.example.airandweather.AirAndWeather.retrofit
 
 data class AirQualityResponse(
     val `data`: Data,

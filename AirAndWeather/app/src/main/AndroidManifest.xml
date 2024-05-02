@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
-        android:name=".MyApp"
+        android:name=".Login.MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -29,16 +29,6 @@
                 <data android:host="oauth"
                     android:scheme="kakaod16087d80c91cf7da093934da501b028" />
             </intent-filter>
-
-        </activity>
-        <activity
-            android:name=".ChosenActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".Login.LoginActivity"
@@ -46,6 +36,14 @@
         </activity>
         <activity
             android:name=".Login.SignUpActivity"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".myPage.MyPage"
+            android:exported="false">
+        </activity>
+        <activity
+            android:name=".myPage.MyPageEdit"
             android:exported="false">
         </activity>
         <activity
@@ -58,7 +56,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDHHREmWj526xBYkWxgp3nNJ9XkPFcsNzg" />
+            android:value="AIzaSyABquaUkYhSQ6YX8QkmtCLthI_f5r475so" />
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
@@ -66,7 +64,12 @@
 
         <activity
             android:name=".MainActivity"
-            android:exported="false">
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

@@ -4,6 +4,7 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -11,7 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.airandweather.ChosenActivity
+import com.example.airandweather.MainActivity
 import com.example.airandweather.R
 import com.example.airandweather.databinding.ActivityLoginBinding
 import com.example.airandweather.db.AppDatabase
@@ -37,6 +38,7 @@ import com.navercorp.nid.profile.data.NidProfileResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 
 class LoginActivity : AppCompatActivity() {
     // 레이아웃 및 데이터베이스 관련 멤버 변수
@@ -86,6 +88,12 @@ class LoginActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // 홈 버튼 클릭 이벤트
+        binding.homeIcon.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
         // 카카오 로그인 버튼 클릭 이벤트
         binding.buttonKakaoLogin.setOnClickListener {
             if (UserApiClient.instance.isKakaoTalkLoginAvailable(this)) {
@@ -109,9 +117,6 @@ class LoginActivity : AppCompatActivity() {
             signIn() // 로그인 프로세스 시작
         }
 
-        // 네이버 로그인 초기화 함수
-        initializeNaverIdLogin()
-
         // 네이버 로그인 버튼 클릭 이벤트
         binding.buttonNaverLogin.setOnClickListener {
             startNaverLogin()
@@ -119,16 +124,6 @@ class LoginActivity : AppCompatActivity() {
     }
 
     // ================== 네이버 소셜 로그인 ================
-    // 네이버 로그인 초기화 함수
-    private fun initializeNaverIdLogin() {
-        // 네이버 로그인에 필요한 클라이언트 정보 로드
-        val naverClientId = getString(R.string.social_login_info_naver_client_id)
-        val naverClientSecret = getString(R.string.social_login_info_naver_client_secret)
-        val naverClientName = getString(R.string.social_login_info_naver_client_name)
-        // 네이버 로그인 SDK 초기화
-        NaverIdLoginSDK.initialize(this, naverClientId, naverClientSecret, naverClientName)
-    }
-
     // 네이버 로그인 시작 함수
     private fun startNaverLogin() {
         // 프로필 콜백 객체 생성
@@ -151,7 +146,7 @@ class LoginActivity : AppCompatActivity() {
                     prefs.apply()
 
                     // ChosenActivity로 넘어가기
-                    val intent = Intent(this@LoginActivity, ChosenActivity::class.java)
+                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     startActivity(intent)
                     finish()
                 }
@@ -262,7 +257,7 @@ class LoginActivity : AppCompatActivity() {
                 prefs.apply()
 
                 // ChosenActivity로 넘어가기
-                val intent = Intent(this@LoginActivity, ChosenActivity::class.java)
+                val intent = Intent(this@LoginActivity, MainActivity::class.java)
                 startActivity(intent)
                 finish()
             } else {
@@ -308,7 +303,7 @@ class LoginActivity : AppCompatActivity() {
                 prefs.apply()
 
                 // 사용자 정보 요청이 성공한 후 ChosenActivity로 이동
-                val intent = Intent(this@LoginActivity, ChosenActivity::class.java)
+                val intent = Intent(this@LoginActivity, MainActivity::class.java)
                 startActivity(intent)
                 finish()
             }
@@ -321,45 +316,39 @@ class LoginActivity : AppCompatActivity() {
         val email = binding.editTextEmail.text.toString().trim()
         val password = binding.editTextPassword.text.toString().trim()
 
+
         if (email.isEmpty() || password.isEmpty()) {
-            showToast("이메일과 비밀번호를 입력해주세요.")
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@LoginActivity, "이메일과 비밀번호를 입력해주세요.", Toast.LENGTH_SHORT).show()
+            }
             return
         }
 
         val member = memberDao.findMemberByEmail(email)
 
         if (member != null && member.password == password) {
-            loginSuccess()
-        } else {
-            showLoginError()
-        }
-    }
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@LoginActivity, "로그인 성공!", Toast.LENGTH_SHORT).show()
 
-    // 로그인 성공 시 실행되는 함수
-    private suspend fun loginSuccess() {
-        withContext(Dispatchers.Main) {
-            showToast("일반 로그인 성공!")
-            getSharedPreferences("AppPreferences", Context.MODE_PRIVATE).edit().apply {
-                putBoolean("IsLoggedIn", true)
-                apply()
+                // 로그인 성공 시, 닉네임 SharedPreferences에 저장
+                val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE).edit()
+                val encodedImage = Base64.encodeToString(member.image, Base64.DEFAULT)
+                sharedPreferences.putString("Nickname", member.nickName)
+                sharedPreferences.putString("Email", member.email)
+                sharedPreferences.putString("Password", member.password)
+                sharedPreferences.putString("ProfileImageUrl", encodedImage)
+                sharedPreferences.putString("mno", member.mno.toString())
+                sharedPreferences.putBoolean("IsLoggedIn", true) // 로그인 상태 저장
+                sharedPreferences.apply()
+
+                val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                startActivity(intent)
+                finish()
             }
-            val intent = Intent(this@LoginActivity, ChosenActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-    }
-
-    // 로그인 실패 시 실행되는 함수
-    private suspend fun showLoginError() {
-        withContext(Dispatchers.Main) {
-            showToast("이메일 또는 비밀번호가 잘못되었습니다.")
-        }
-    }
-
-    // 로그인 성공 메세지 이 함수는 UI 스레드(메인 디스패처)에서 실행
-    private suspend fun showToast(message: String) {
-        withContext(Dispatchers.Main) {
-            Toast.makeText(this@LoginActivity, message, Toast.LENGTH_SHORT).show()
+        } else {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@LoginActivity, "이메일 또는 비밀번호가 잘못되었습니다.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

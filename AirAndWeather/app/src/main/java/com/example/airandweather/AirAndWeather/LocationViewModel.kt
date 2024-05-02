@@ -4,9 +4,9 @@ import android.location.Address
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.airandweather.retrofit.AirQualityResponse
-import com.example.airandweather.retrofit.AirQualityService
-import com.example.airandweather.retrofit.RetrofitConnection
+import com.example.airandweather.AirAndWeather.retrofit.AirQualityResponse
+import com.example.airandweather.AirAndWeather.retrofit.AirQualityService
+import com.example.airandweather.AirAndWeather.retrofit.RetrofitConnection
 import retrofit2.Call
 
 // 위치 정보를 저장하고 공유하기 위한 ViewModel

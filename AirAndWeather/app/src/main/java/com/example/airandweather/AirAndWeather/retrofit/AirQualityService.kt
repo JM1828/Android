@@ -1,4 +1,4 @@
-package com.example.airandweather.retrofit
+package com.example.airandweather.AirAndWeather.retrofit
 
 import retrofit2.Call
 import retrofit2.http.GET

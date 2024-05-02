@@ -15,11 +15,11 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.airandweather.ChosenActivity
+import com.example.airandweather.MainActivity
 import com.example.airandweather.R
 import com.example.airandweather.databinding.FragmentOneBinding
 import com.example.airandweather.databinding.FragmentTwoBinding
-import com.example.airandweather.retrofit.AirQualityResponse
+import com.example.airandweather.AirAndWeather.retrofit.AirQualityResponse
 import java.io.IOException
 import java.lang.IllegalArgumentException
 import java.time.ZoneId
@@ -96,7 +96,7 @@ class TwoFragment : Fragment() {
         setFab()
 
         weatherBinding.homeIcon.setOnClickListener {
-            val intent = Intent(context, ChosenActivity::class.java)
+            val intent = Intent(context, MainActivity::class.java)
             startActivity(intent)
         }
     }

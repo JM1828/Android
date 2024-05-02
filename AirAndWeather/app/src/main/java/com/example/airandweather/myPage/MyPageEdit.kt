@@ -1,4 +1,4 @@
-package com.example.airandweather.Login
+package com.example.airandweather.myPage
 
 import android.content.Context
 import android.content.Intent
@@ -12,9 +12,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.airandweather.Login.LoginActivity
 import com.example.airandweather.MainActivity
 import com.example.airandweather.R
-import com.example.airandweather.databinding.ActivitySignupBinding
+import com.example.airandweather.databinding.ActivityMypageEditBinding
 import com.example.airandweather.db.AppDatabase
 import com.example.airandweather.db.Converters
 import com.example.airandweather.db.MemberDao
@@ -29,59 +30,106 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class SignUpActivity : AppCompatActivity() {
-    private lateinit var binding: ActivitySignupBinding
+class MyPageEdit : AppCompatActivity() {
+    // 뷰 바인딩, 데이터베이스, DAO 초기화
+    private lateinit var binding: ActivityMypageEditBinding
     lateinit var db: AppDatabase
     lateinit var memberDao: MemberDao
     private var imageUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivitySignupBinding.inflate(layoutInflater)
+        // 레이아웃 설정
+        binding = ActivityMypageEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.userImageView.clipToOutline = true
+        // 프로필 이미지의 모서리를 둥글게 처리
+        binding.editImage.clipToOutline = true
+
+        // 데이터베이스 인스턴스 초기화
         db = AppDatabase.getInstance(this)!!
         memberDao = db.getMemberDao()
 
-        // 홈 버튼 클릭시 메인 엑티비티
-        binding.homeIcon.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+        // SharedPreferences로부터 사용자 정보 가져오기
+        val sharedPreferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        val userNickName = sharedPreferences.getString("Nickname", "")
+        val userEmail = sharedPreferences.getString("Email", "")
+        val userPassword = sharedPreferences.getString("Password", "")
+        val base64ImageString = sharedPreferences.getString("ProfileImageUrl", null)
+
+        // SharedPreferences로부터 받은 이미지 데이터 처리
+        base64ImageString?.let {
+            val imageBytes = android.util.Base64.decode(it, android.util.Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            binding.editImage.setImageBitmap(bitmap)
         }
 
-        // 회원가입 화면에서의 사용자 상호작용을 설정
-        binding.signupButton.setOnClickListener {
+        // TextView에 밑줄이 있는 텍스트 설정
+        binding.editTextEmail.setText(userEmail)
+        binding.editTextNickName.setText(userNickName)
+        binding.editTextPassword.setText(userPassword)
+
+        // 회원정보 수정 버튼 클릭 이벤트 설정
+        binding.updateButton.setOnClickListener {
             lifecycleScope.launch {
-                signUp()
+                update() // 사용자 정보 업데이트 함수
             }
         }
 
-        // 이미지 선택 및 회원가입 버튼에 대한 클릭 리스너 설정
-        binding.btnImageView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
+        // 프로필 이미지 선택 이벤트 설정
+        binding.editImage.setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK).apply {
+                type = "image/*"
+            }
             activityResult.launch(intent)
         }
     }
 
-    // 회원가입 로직을 처리하는 함수
-    private suspend fun signUp() {
-        // 입력 필드에서 값 추출
-        val email = binding.profileEmail.text.toString()
-        val password = binding.profilePassword.text.toString()
-        val nickName = binding.profileNickname.text.toString()
+    private suspend fun update() {
+        val updateEmail = binding.editTextEmail.text.toString()
+        val updatePassword = binding.editTextPassword.text.toString()
+        val updateNickName = binding.editTextNickName.text.toString()
+
+        val sharedPreferences = this.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        val userMno = sharedPreferences.getString("mno", null)?.toIntOrNull()
 
         // 입력 유효성 검사 실패 시 함수 종료
-        if (!validateInputs(email, password, nickName)) return
+        if (!validateInputs(updateEmail, updatePassword, updateNickName)) return
 
         // 이미지 처리 및 바이트 배열 가져오기
         val imageByteArray: ByteArray = processImageForSignUp() ?: return
         // 이미지 바이트 배열 로깅
         Log.d("imageByteArray", "$imageByteArray")
 
-        // 회원정보 등록
-        registerNewMember(email, password, nickName, imageByteArray)
+        lifecycleScope.launch {
+            // userMno가 null이 아닐 때만 조회
+            val existingMember = userMno?.let { memberDao.getMemberById(it) }
+
+            if (existingMember != null) {
+                // 기존 사용자 정보를 새 정보로 업데이트합니다.
+                val updateEntity = MemberEntity(userMno, updateEmail, updatePassword, updateNickName, imageByteArray)
+                memberDao.updateMember(updateEntity)
+
+                Toast.makeText(this@MyPageEdit, "회원정보가 수정되었습니다.", Toast.LENGTH_SHORT).show()
+
+                // 업데이트된 정보를 SharedPreferences에 저장
+                val editor = sharedPreferences.edit()
+                editor.putString("Nickname", updateEntity.nickName)
+                editor.putString("Email", updateEntity.email)
+                editor.putString("Password", updateEntity.password)
+
+                if (imageByteArray.isNotEmpty()) {
+                    saveImageAndPathInPreferences(imageByteArray, updateNickName)
+                }
+                editor.apply()
+
+                navigateToLogin()
+            } else {
+                // 현재는 userMno을 통해 동일한 회원을 찾지 못하는 경우가 매우 드물 것으로 예상됩니다.
+                // 로직에 따라 적절한 처리가 필요할 수 있습니다.
+                Toast.makeText(this@MyPageEdit, "회원 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     // 갤러리에서 이미지 선택했을 때의 콜백 처리
@@ -104,7 +152,7 @@ class SignUpActivity : AppCompatActivity() {
             val byteData = convertUriToByteArray(uri)
             val bitmap = BitmapFactory.decodeByteArray(byteData, 0, byteData.size)
             // ImageView 업데이트
-            binding.userImageView.setImageBitmap(bitmap)
+            binding.editImage.setImageBitmap(bitmap)
             Log.d("ImageSelection", "Selected image URI: $uri")
         }
     }
@@ -168,34 +216,13 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
-    // 새로운 회원 정보를 데이터베이스에 등록
-    private fun registerNewMember(
-        email: String,
-        password: String,
-        nickName: String,
-        imageByteArray: ByteArray
-    ) {
-        lifecycleScope.launch {
-            val existingMember = memberDao.findMemberByEmail(email)
-            if (existingMember == null) {
-                val newMember = MemberEntity(null, email, password, nickName, imageByteArray)
-                memberDao.insertMember(newMember)
-                showToast("회원가입이 완료되었습니다.")
-                saveImageAndPathInPreferences(imageByteArray, nickName)
-                navigateToLogin()
-            } else {
-                showToast("이미 가입된 계정입니다.")
-            }
-        }
-    }
-
-    // 이미지 파일을 저장하고, 파일 경로를 SharedPreferences에 저장
-    private fun saveImageAndPathInPreferences(imageByteArray: ByteArray, nickName: String) {
+    // 추가: 이미지를 파일로 저장하고 파일 경로를 SharedPreferences에 저장하는 함수
+    private fun saveImageAndPathInPreferences(imageByteArray: ByteArray, updateNickName: String) {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val fileName = "${nickName}_$timeStamp.jpg"
+        val fileName = "${updateNickName}_$timeStamp.jpg"
 
         // 파일을 내부 저장소에 저장
-        val file = File(this@SignUpActivity.filesDir, fileName)
+        val file = File(this@MyPageEdit.filesDir, fileName)
         file.writeBytes(imageByteArray)
 
         // 파일 경로를 SharedPreferences에 저장
@@ -205,11 +232,13 @@ class SignUpActivity : AppCompatActivity() {
         }
     }
 
-    // ============== 회원가입 유효성 검사 ===============
-    // 비밀번호가 유효한지 확인, 유효한 비밀번호는 길이가 6자 이상
-    private fun isValidPassword(password: String): Boolean = password.length >= 6
+    // ============== 수정 페이지 유효성 검사 ====================
+    // 비밀번호 유효성 검사 함수
+    private fun isValidPassword(password: String): Boolean {
+        return password.length >= 6
+    }
 
-    // 이메일 유효성 검사를 위해 정규 표현식을 사용
+    // 이메일 유효성 검사 함수
     private fun isValidEmail(email: String): Boolean {
         val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
         return email.matches(emailRegex.toRegex())
@@ -241,16 +270,25 @@ class SignUpActivity : AppCompatActivity() {
     private fun showToast(message: String) {
         runOnUiThread {
             if (!isFinishing) {
-                Toast.makeText(this@SignUpActivity, message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MyPageEdit, message, Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    // 회원가입이 성공적으로 완료된 후 로그인 화면으로 이동
+    // 수정이 성공적으로 완료된 후 마이페이지 화면으로 이동
     private fun navigateToLogin() {
-        val intent = Intent(this@SignUpActivity, LoginActivity::class.java).apply {
+        val intent = Intent(this@MyPageEdit, MyPage::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         startActivity(intent)
     }
 }
+
+
+
+
+
+
+
+
+

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main2"
     android:background="@color/white">
-    <!--헤더-->
+<!--헤더-->
     <View
         android:id="@+id/rectangle_9"
         android:layout_width="0dp"
         android:layout_height="110dp"
-        android:background="#D9D9D9"
+        android:background="#808080"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -32,17 +32,17 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal|center_vertical"
         android:lineSpacingExtra="3sp"
-        android:text="Profile"
-        android:textColor="#404040"
-        android:textSize="36sp"
+        android:text="My Page"
+        android:textColor="#ffffff"
         android:textStyle="bold"
+        android:textSize="36sp"
         app:layout_constraintBottom_toBottomOf="@+id/rectangle_9"
-        app:layout_constraintEnd_toStartOf="@id/homeIcon"
+        app:layout_constraintEnd_toStartOf="@id/Air_icon"
         app:layout_constraintStart_toEndOf="@id/menu_icon"
         app:layout_constraintTop_toTopOf="@id/rectangle_9" />
 
     <ImageView
-        android:id="@+id/homeIcon"
+        android:id="@+id/Air_icon"
         android:layout_width="53dp"
         android:layout_height="53dp"
         android:layout_marginEnd="10dp"
@@ -51,8 +51,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/rectangle_9" />
     <!--헤더-->
-
-    <!--입력란-->
+<!--보여주기-->
     <LinearLayout
         android:layout_width="300dp"
         android:layout_height="wrap_content"
@@ -73,11 +72,11 @@
                 android:layout_height="50dp"
                 android:layout_marginEnd="-40dp"
                 android:layout_marginBottom="-60dp"
-                android:background="@drawable/plusbtn"
-                android:textColor="@color/white"
-                android:textSize="14sp"
                 app:iconGravity="textStart"
                 app:iconSize="40dp"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:background="@drawable/plusbtn"
                 tools:ignore="MissingConstraints" />
 
 
@@ -92,22 +91,22 @@
                 app:cardElevation="0dp">
 
                 <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/user_imageView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/profileee" />
+                    android:id="@+id/editImage"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:src="@drawable/profileee"
+                    />
 
 
             </androidx.cardview.widget.CardView>
-        </LinearLayout><!--이미지 등록-->
-        <!--이메일 등록-->
+        </LinearLayout><!--이미지-->
+<!--이메일-->
         <LinearLayout
             android:id="@+id/email_place"
+            tools:ignore="MissingConstraints,UselessParent"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginTop="20dp"
-            android:orientation="horizontal"
-            tools:ignore="MissingConstraints,UselessParent">
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/email"
@@ -121,20 +120,20 @@
                 android:textStyle="bold" />
 
             <EditText
-                android:id="@+id/profileEmail"
+                android:id="@+id/editTextEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:inputType="textEmailAddress" />
-        </LinearLayout> <!--이메일 등록-->
-        <!--비밀번호 등록-->
+        </LinearLayout> <!--이메일 -->
+<!--비밀번호-->
         <LinearLayout
             android:id="@+id/password_place"
+            tools:ignore="MissingConstraints,UselessParent"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            tools:ignore="MissingConstraints,UselessParent">
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/password"
@@ -148,21 +147,22 @@
                 android:textStyle="bold" />
 
             <EditText
-                android:id="@+id/profilePassword"
+                android:id="@+id/editTextPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:inputType="textPassword" />
+                android:inputType="textEmailAddress"
+                />
 
-        </LinearLayout> <!--비밀번호 등록-->
-        <!--닉네임 등록-->
+        </LinearLayout> <!--비밀번호-->
+        <!--닉네임-->
         <LinearLayout
             android:id="@+id/nickname_place"
+            tools:ignore="MissingConstraints,UselessParent"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            tools:ignore="MissingConstraints,UselessParent">
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/nickname"
@@ -176,14 +176,15 @@
                 android:textStyle="bold" />
 
             <EditText
-                android:id="@+id/profileNickname"
+                android:id="@+id/editTextNickName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:inputType="textEmailAddress" />
 
-        </LinearLayout><!--닉네임 등록-->
-    </LinearLayout><!--입력란-->
+        </LinearLayout><!--닉네임-->
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/buttonLogin"
@@ -191,19 +192,28 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <android.widget.Button
-            android:id="@+id/signupButton"
+            android:id="@+id/updateButton"
+            android:layout_marginTop="10dp"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="80dp"
-            android:background="@drawable/button_login2"
-            android:text="Sign up"
             android:textColor="#ffffff"
-            android:textSize="20dp" />
+            android:textSize="20dp"
+            android:text="회원정보 수정완료"
+            android:background="@drawable/button_login2"/>
+        <android.widget.Button
+            android:id="@+id/resetButton"
+            android:layout_marginTop="10dp"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffff"
+            android:textSize="20dp"
+            android:text="뒤로가기"
+            android:background="@drawable/button_login2"
+            android:layout_marginBottom="80dp"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

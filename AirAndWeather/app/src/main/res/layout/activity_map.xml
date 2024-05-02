@@ -30,15 +30,14 @@
         <requestFocus />
     </EditText>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <ImageView
         android:id="@+id/fab_current_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="12dp"
         android:backgroundTint="@color/white"
         android:src="@drawable/icon_location"
-        app:borderWidth="0dp"
         app:layout_constraintBottom_toTopOf="@+id/btn_check_here"
         app:layout_constraintEnd_toEndOf="parent" />
 

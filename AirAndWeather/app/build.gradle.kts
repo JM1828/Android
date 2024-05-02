@@ -77,6 +77,17 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.12.0")
     kapt("com.github.bumptech.glide:compiler:4.12.0")
 
+    //CircleImageView
+    implementation ("com.github.bumptech.glide:glide:4.10.0")
+
+    //이미지
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.10.0")
+    implementation ("de.hdodenhof:circleimageview:3.1.0")
+
+    //비트맵
+    implementation ("com.github.bumptech.glide:glide:4.13.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.13.0")
+
     // 소셜 로그인 카카오
     implementation("com.kakao.sdk:v2-user:2.20.1")
 
